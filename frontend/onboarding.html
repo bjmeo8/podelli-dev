@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bienvenue - Podelli</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- TailwindCSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+
+  <!-- TailwindCSS Configuration -->
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          },
+          colors: {
+            border: 'hsl(0 0% 89%)',
+            background: 'hsl(0 0% 100%)',
+            foreground: 'hsl(0 0% 0%)',
+            primary: {
+              DEFAULT: 'hsl(0 0% 0%)',
+              foreground: 'hsl(0 0% 100%)',
+            },
+            secondary: {
+              DEFAULT: 'hsl(0 0% 97%)',
+              foreground: 'hsl(0 0% 0%)',
+            },
+            muted: {
+              DEFAULT: 'hsl(0 0% 96%)',
+              foreground: 'hsl(0 0% 40%)',
+            },
+            accent: {
+              DEFAULT: 'hsl(164 86% 45%)',
+              foreground: 'hsl(0 0% 100%)',
+            },
+          },
+          keyframes: {
+            'fade-in': {
+              '0%': { opacity: '0', transform: 'translateY(10px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
+            },
+            'slide-in-right': {
+              '0%': { opacity: '0', transform: 'translateX(30px)' },
+              '100%': { opacity: '1', transform: 'translateX(0)' },
+            },
+            'slide-in-left': {
+              '0%': { opacity: '0', transform: 'translateX(-30px)' },
+              '100%': { opacity: '1', transform: 'translateX(0)' },
+            },
+          },
+          animation: {
+            'fade-in': 'fade-in 0.5s ease-out',
+            'slide-in-right': 'slide-in-right 0.5s ease-out',
+            'slide-in-left': 'slide-in-left 0.5s ease-out',
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    * { border-color: hsl(0 0% 89%); }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    h1, h2, h3, h4, h5, h6 { font-weight: 700; }
+    .shadow-soft { box-shadow: 0 2px 16px -4px rgba(0, 0, 0, 0.06); }
+    .shadow-medium { box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.1); }
+    .transition-smooth { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+
+    .btn-primary {
+      background: hsl(164 86% 45%);
+      color: white;
+      transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: hsl(164 86% 40%);
+      transform: translateY(-1px);
+      box-shadow: 0 8px 16px -4px hsla(164, 86%, 45%, 0.4);
+    }
+
+    .btn-secondary {
+      border: 2px solid hsl(0 0% 89%);
+      transition: all 0.3s ease;
+    }
+
+    .btn-secondary:hover {
+      border-color: hsl(0 0% 70%);
+      background: hsl(0 0% 98%);
+    }
+
+    .step-indicator {
+      width: 100%;
+      height: 4px;
+      background: hsl(0 0% 93%);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .step-progress {
+      height: 100%;
+      background: hsl(164 86% 45%);
+      transition: width 0.3s ease;
+    }
+
+    .language-card {
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: 2px solid hsl(0 0% 89%);
+    }
+
+    .language-card:hover {
+      border-color: hsl(164 86% 45%);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.1);
+    }
+
+    .language-card.selected {
+      border-color: hsl(164 86% 45%);
+      background: hsla(164, 86%, 45%, 0.05);
+    }
+
+    .level-card {
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: 2px solid hsl(0 0% 89%);
+    }
+
+    .level-card:hover {
+      border-color: hsl(164 86% 45%);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.1);
+    }
+
+    .level-card.selected {
+      border-color: hsl(164 86% 45%);
+      background: hsla(164, 86%, 45%, 0.05);
+    }
+
+    .goal-card {
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: 2px solid hsl(0 0% 89%);
+    }
+
+    .goal-card:hover {
+      border-color: hsl(164 86% 45%);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.1);
+    }
+
+    .goal-card.selected {
+      border-color: hsl(164 86% 45%);
+      background: hsla(164, 86%, 45%, 0.05);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+
+<body class="bg-background text-foreground">
+  <!-- Main Content -->
+  <main class="min-h-screen flex items-center justify-center px-6 py-12">
+    <div class="w-full max-w-2xl">
+      <!-- Progress Indicator -->
+      <div class="mb-8">
+        <div class="step-indicator">
+          <div id="stepProgress" class="step-progress" style="width: 33.33%"></div>
+        </div>
+        <div class="flex justify-between mt-2">
+          <span id="stepText" class="text-xs font-medium text-muted-foreground">Étape 1 sur 3</span>
+          <span id="skipButton" class="text-xs font-medium text-accent hover:text-accent/80 cursor-pointer transition-smooth" onclick="skipOnboarding()">Passer</span>
+        </div>
+      </div>
+
+      <!-- Step 1: Choose Language -->
+      <div id="step1" class="animate-fade-in">
+        <div class="text-center mb-8">
+          <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-accent/10 flex items-center justify-center">
+            <svg class="h-8 w-8 text-accent" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><path d="M2 12h20"/></svg>
+          </div>
+          <h1 class="text-3xl font-bold mb-2">Quelle langue voulez-vous apprendre ?</h1>
+          <p class="text-muted-foreground">Sélectionnez la langue que vous souhaitez maîtriser</p>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
+          <!-- English -->
+          <div class="language-card p-6 rounded-3xl text-center" onclick="selectLanguage('english', this)">
+            <div class="text-4xl mb-3">🇬🇧</div>
+            <h3 class="font-bold mb-1">Anglais</h3>
+            <p class="text-xs text-muted-foreground">English</p>
+          </div>
+
+          <!-- Spanish -->
+          <div class="language-card p-6 rounded-3xl text-center" onclick="selectLanguage('spanish', this)">
+            <div class="text-4xl mb-3">🇪🇸</div>
+            <h3 class="font-bold mb-1">Espagnol</h3>
+            <p class="text-xs text-muted-foreground">Español</p>
+          </div>
+
+          <!-- French -->
+          <div class="language-card p-6 rounded-3xl text-center" onclick="selectLanguage('french', this)">
+            <div class="text-4xl mb-3">🇫🇷</div>
+            <h3 class="font-bold mb-1">Français</h3>
+            <p class="text-xs text-muted-foreground">Français</p>
+          </div>
+
+          <!-- German -->
+          <div class="language-card p-6 rounded-3xl text-center" onclick="selectLanguage('german', this)">
+            <div class="text-4xl mb-3">🇩🇪</div>
+            <h3 class="font-bold mb-1">Allemand</h3>
+            <p class="text-xs text-muted-foreground">Deutsch</p>
+          </div>
+
+          <!-- Italian -->
+          <div class="language-card p-6 rounded-3xl text-center" onclick="selectLanguage('italian', this)">
+            <div class="text-4xl mb-3">🇮🇹</div>
+            <h3 class="font-bold mb-1">Italien</h3>
+            <p class="text-xs text-muted-foreground">Italiano</p>
+          </div>
+
+          <!-- Portuguese -->
+          <div class="language-card p-6 rounded-3xl text-center" onclick="selectLanguage('portuguese', this)">
+            <div class="text-4xl mb-3">🇵🇹</div>
+            <h3 class="font-bold mb-1">Portugais</h3>
+            <p class="text-xs text-muted-foreground">Português</p>
+          </div>
+        </div>
+
+        <button id="step1Next" class="btn-primary w-full py-3 px-6 rounded-full font-bold text-base" onclick="nextStep(2)" disabled>
+          Continuer
+        </button>
+      </div>
+
+      <!-- Step 2: Choose Level -->
+      <div id="step2" class="hidden">
+        <div class="text-center mb-8">
+          <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-accent/10 flex items-center justify-center">
+            <svg class="h-8 w-8 text-accent" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+          </div>
+          <h1 class="text-3xl font-bold mb-2">Quel est votre niveau ?</h1>
+          <p class="text-muted-foreground">Cela nous aidera à personnaliser votre expérience</p>
+        </div>
+
+        <div class="space-y-4 mb-8">
+          <!-- Beginner -->
+          <div class="level-card p-6 rounded-3xl" onclick="selectLevel('beginner', this)">
+            <div class="flex items-start gap-4">
+              <div class="w-12 h-12 rounded-full bg-green-500/10 flex items-center justify-center flex-shrink-0">
+                <svg class="h-6 w-6 text-green-500" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="m5 12 7-7 7 7"/></svg>
+              </div>
+              <div class="flex-1">
+                <h3 class="font-bold text-lg mb-1">Débutant</h3>
+                <p class="text-sm text-muted-foreground">Je commence tout juste à apprendre cette langue</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Intermediate -->
+          <div class="level-card p-6 rounded-3xl" onclick="selectLevel('intermediate', this)">
+            <div class="flex items-start gap-4">
+              <div class="w-12 h-12 rounded-full bg-amber-500/10 flex items-center justify-center flex-shrink-0">
+                <svg class="h-6 w-6 text-amber-500" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+              </div>
+              <div class="flex-1">
+                <h3 class="font-bold text-lg mb-1">Intermédiaire</h3>
+                <p class="text-sm text-muted-foreground">J'ai des bases et je veux progresser</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Advanced -->
+          <div class="level-card p-6 rounded-3xl" onclick="selectLevel('advanced', this)">
+            <div class="flex items-start gap-4">
+              <div class="w-12 h-12 rounded-full bg-purple-500/10 flex items-center justify-center flex-shrink-0">
+                <svg class="h-6 w-6 text-purple-500" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+              </div>
+              <div class="flex-1">
+                <h3 class="font-bold text-lg mb-1">Avancé</h3>
+                <p class="text-sm text-muted-foreground">Je maîtrise bien la langue et veux perfectionner</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex gap-4">
+          <button class="btn-secondary flex-1 py-3 px-6 rounded-full font-bold" onclick="prevStep(1)">
+            Retour
+          </button>
+          <button id="step2Next" class="btn-primary flex-1 py-3 px-6 rounded-full font-bold" onclick="nextStep(3)" disabled>
+            Continuer
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 3: Choose Goal -->
+      <div id="step3" class="hidden">
+        <div class="text-center mb-8">
+          <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-accent/10 flex items-center justify-center">
+            <svg class="h-8 w-8 text-accent" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m16 12-4-4-4 4"/><path d="M12 16V8"/></svg>
+          </div>
+          <h1 class="text-3xl font-bold mb-2">Quel est votre objectif ?</h1>
+          <p class="text-muted-foreground">Pourquoi voulez-vous apprendre cette langue ?</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+          <!-- Travel -->
+          <div class="goal-card p-6 rounded-3xl" onclick="selectGoal('travel', this)">
+            <div class="text-3xl mb-3">✈️</div>
+            <h3 class="font-bold mb-1">Voyager</h3>
+            <p class="text-sm text-muted-foreground">Pour mes voyages et vacances</p>
+          </div>
+
+          <!-- Work -->
+          <div class="goal-card p-6 rounded-3xl" onclick="selectGoal('work', this)">
+            <div class="text-3xl mb-3">💼</div>
+            <h3 class="font-bold mb-1">Travail</h3>
+            <p class="text-sm text-muted-foreground">Pour ma carrière professionnelle</p>
+          </div>
+
+          <!-- Study -->
+          <div class="goal-card p-6 rounded-3xl" onclick="selectGoal('study', this)">
+            <div class="text-3xl mb-3">📚</div>
+            <h3 class="font-bold mb-1">Études</h3>
+            <p class="text-sm text-muted-foreground">Pour mes études académiques</p>
+          </div>
+
+          <!-- Culture -->
+          <div class="goal-card p-6 rounded-3xl" onclick="selectGoal('culture', this)">
+            <div class="text-3xl mb-3">🎭</div>
+            <h3 class="font-bold mb-1">Culture</h3>
+            <p class="text-sm text-muted-foreground">Par passion pour la culture</p>
+          </div>
+        </div>
+
+        <div class="flex gap-4">
+          <button class="btn-secondary flex-1 py-3 px-6 rounded-full font-bold" onclick="prevStep(2)">
+            Retour
+          </button>
+          <button id="step3Next" class="btn-primary flex-1 py-3 px-6 rounded-full font-bold" onclick="completeOnboarding()" disabled>
+            Commencer
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Store user preferences
+    const userPreferences = {
+      language: null,
+      level: null,
+      goal: null
+    };
+
+    // Select Language
+    function selectLanguage(language, element) {
+      // Remove selected class from all language cards
+      document.querySelectorAll('.language-card').forEach(card => {
+        card.classList.remove('selected');
+      });
+
+      // Add selected class to clicked card
+      element.classList.add('selected');
+
+      // Store selection
+      userPreferences.language = language;
+
+      // Enable next button
+      document.getElementById('step1Next').disabled = false;
+    }
+
+    // Select Level
+    function selectLevel(level, element) {
+      // Remove selected class from all level cards
+      document.querySelectorAll('.level-card').forEach(card => {
+        card.classList.remove('selected');
+      });
+
+      // Add selected class to clicked card
+      element.classList.add('selected');
+
+      // Store selection
+      userPreferences.level = level;
+
+      // Enable next button
+      document.getElementById('step2Next').disabled = false;
+    }
+
+    // Select Goal
+    function selectGoal(goal, element) {
+      // Remove selected class from all goal cards
+      document.querySelectorAll('.goal-card').forEach(card => {
+        card.classList.remove('selected');
+      });
+
+      // Add selected class to clicked card
+      element.classList.add('selected');
+
+      // Store selection
+      userPreferences.goal = goal;
+
+      // Enable next button
+      document.getElementById('step3Next').disabled = false;
+    }
+
+    // Navigation
+    function nextStep(step) {
+      // Hide all steps
+      document.getElementById('step1').classList.add('hidden');
+      document.getElementById('step2').classList.add('hidden');
+      document.getElementById('step3').classList.add('hidden');
+
+      // Show current step
+      document.getElementById(`step${step}`).classList.remove('hidden');
+
+      // Update progress
+      const progress = (step / 3) * 100;
+      document.getElementById('stepProgress').style.width = `${progress}%`;
+      document.getElementById('stepText').textContent = `Étape ${step} sur 3`;
+    }
+
+    function prevStep(step) {
+      nextStep(step);
+    }
+
+    function skipOnboarding() {
+      if (confirm('Êtes-vous sûr de vouloir passer l\'introduction ?')) {
+        window.location.href = 'home.html';
+      }
+    }
+
+    function completeOnboarding() {
+      // TODO: Save user preferences to backend
+      console.log('User preferences:', userPreferences);
+
+      // Redirect to home page
+      window.location.href = 'home.html';
+    }
+  </script>
+  <!-- Podelli Scripts -->
+  <script src="/assets/js/utils.js"></script>
+  <script src="/assets/js/auth.js"></script>
+  <script src="/assets/js/api.js"></script>
+</body>
+</html>

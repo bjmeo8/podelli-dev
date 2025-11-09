@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Podelli - AI-Powered Language Learning</title>
+  <meta name="description" content="Master any language with Podelli's AI-powered learning platform. Interactive games, podcast content, and personalized lessons." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- TailwindCSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Canvas Confetti Library -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+
+  <!-- TailwindCSS Configuration -->
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+          colors: {
+            border: 'hsl(0 0% 89%)', background: 'hsl(0 0% 100%)', foreground: 'hsl(0 0% 0%)',
+            primary: { DEFAULT: 'hsl(0 0% 0%)', foreground: 'hsl(0 0% 100%)' },
+            secondary: { DEFAULT: 'hsl(0 0% 97%)', foreground: 'hsl(0 0% 0%)' },
+            muted: { DEFAULT: 'hsl(0 0% 96%)', foreground: 'hsl(0 0% 40%)' },
+            accent: { DEFAULT: 'hsl(164 86% 45%)', foreground: 'hsl(0 0% 100%)' },
+          },
+          keyframes: {
+            'fade-in': { '0%': { opacity: '0', transform: 'translateY(10px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
+            'scale-in': { '0%': { transform: 'scale(0.95)', opacity: '0' }, '100%': { transform: 'scale(1)', opacity: '1' } },
+            'pulse-like': { '0%, 100%': { transform: 'scale(1)' }, '50%': { transform: 'scale(1.2)' } }
+          },
+          animation: { 'fade-in': 'fade-in 0.5s ease-out', 'scale-in': 'scale-in 0.3s ease-out', 'pulse-like': 'pulse-like 0.3s ease-in-out' },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    * { border-color: hsl(0 0% 89%); }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow: hidden; /* Empêche le scroll global */
+      background-color: #000; /* Fond noir pour les bords sur grands écrans */
+    }
+    h1, h2, h3, h4, h5, h6 { font-weight: 700; }
+    .shadow-soft { box-shadow: 0 2px 16px -4px rgba(0, 0, 0, 0.06); }
+    .shadow-medium { box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.1); }
+    .transition-smooth { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+
+    .feed-container {
+      height: 100vh; /* Utilise 100vh standard pour meilleure compatibilité mobile */
+      height: 100dvh; /* Utilise dynamic viewport height si supporté */
+      margin-top: 0;
+      margin-bottom: 0;
+      scroll-snap-type: y mandatory;
+      overflow-y: scroll;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      background-color: #000;
+    }
+    .feed-container::-webkit-scrollbar {
+      display: none;
+    }
+
+    .video-card {
+      height: 100%;
+      width: 100%;
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+      position: relative;
+      overflow: hidden; /* Important pour contenir les éléments absolus */
+    }
+
+    /* Gradient overlays */
+    .gradient-overlay-top {
+      background: linear-gradient(180deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0) 100%);
+    }
+    .gradient-overlay-bottom {
+      background: linear-gradient(0deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
+    }
+
+    /* Animations personnalisées pour les actions */
+    @keyframes pulse-ring {
+      0% {
+        width: 140px;
+        height: 140px;
+        opacity: 1;
+        border-width: 3px;
+      }
+      50% {
+        opacity: 0.6;
+      }
+      100% {
+        width: 280px;
+        height: 280px;
+        opacity: 0;
+        border-width: 1px;
+      }
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-8px); }
+      50% { transform: translateX(8px); }
+      75% { transform: translateX(-8px); }
+    }
+
+    @keyframes scale-in {
+      0% {
+        transform: scale(0.9);
+        opacity: 0;
+      }
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    /* Options de quiz */
+    .quiz-option.selected {
+      border-color: hsl(164, 86%, 45%);
+      background: rgba(28, 183, 154, 0.08);
+      transform: scale(1.02);
+      box-shadow: 0 6px 20px rgba(28, 183, 154, 0.25);
+    }
+
+    .quiz-option.correct {
+      border-color: #22C55E !important;
+      border-width: 3px !important;
+      background: rgba(34, 197, 94, 0.25) !important;
+    }
+
+    .quiz-option.incorrect {
+      border-color: #EF4444 !important;
+      border-width: 3px !important;
+      background: rgba(239, 68, 68, 0.25) !important;
+      animation: shake 0.4s ease-in-out;
+    }
+
+    .quiz-option-img.selected {
+      border-color: hsl(164, 86%, 45%);
+      background: rgba(28, 183, 154, 0.08);
+      transform: scale(1.02);
+      box-shadow: 0 6px 20px rgba(28, 183, 154, 0.25);
+    }
+
+    .quiz-option-img.correct {
+      border-color: #22C55E !important;
+      border-width: 3px !important;
+      background: rgba(34, 197, 94, 0.25) !important;
+    }
+
+    .quiz-option-img.incorrect {
+      border-color: #EF4444 !important;
+      border-width: 3px !important;
+      background: rgba(239, 68, 68, 0.25) !important;
+      animation: shake 0.4s ease-in-out;
+    }
+
+    /* Enregistrement audio */
+    .recording .sound-ring {
+      animation: pulse-ring 1.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+      opacity: 1;
+    }
+
+    .recording .sound-ring:nth-child(2) {
+      animation-delay: 0.4s;
+    }
+
+    .recording .sound-ring:nth-child(3) {
+      animation-delay: 0.8s;
+    }
+
+    .recording {
+      background: rgba(239, 68, 68, 0.95) !important;
+      border-color: #EF4444 !important;
+    }
+
+    .recording svg {
+      color: white !important;
+    }
+
+    .animate-scale-in {
+      animation: scale-in 0.5s ease-out;
+    }
+
+    /* Z-index layers */
+    .z-15 { z-index: 15; }
+    .z-100 { z-index: 100; }
+    .z-101 { z-index: 101; }
+    .z-102 { z-index: 102; }
+
+    /* Bouton Play Central */
+    #playVideoBtn {
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    /* Ajustements pour Tailwind */
+    .border-3 { border-width: 3px; }
+    .h-13 { height: 52px; }
+    .py-4\.5 { padding-top: 18px; padding-bottom: 18px; }
+    .gap-3\.5 { gap: 14px; }
+    .hover\:scale-108:hover { transform: scale(1.08); }
+    .shadow-3xl { box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35); }
+  </style>
+</head>
+
+<body class="bg-background text-foreground">
+  <!-- Header (Fixe, z-50) -->
+  <header class="bg-background border-b border-border fixed top-0 left-0 right-0 z-50 shadow-soft rounded-b-3xl">
+    <div class="max-w-lg mx-auto px-6 py-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
+            <svg class="h-5 w-5 text-primary-foreground" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg>
+          </div>
+          <h1 class="text-2xl font-bold">Podelli</h1>
+        </div>
+        <span class="text-xs font-bold px-3 py-1.5 bg-primary text-primary-foreground rounded-full">
+          AI POWERED
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Video Feed (Plein écran, défile derrière le header/footer) -->
+  <div class="feed-container max-w-lg mx-auto">
+
+    <!-- ===== ACTION 1: VIDEO QUIZ ===== -->
+    <div class="video-card bg-gradient-to-br from-blue-600 to-blue-400">
+      <!-- Video background -->
+      <video id="videoQuizPlayer" class="absolute inset-0 w-full h-full object-cover" playsinline loop>
+        <source src="/assets/videos/Une_stewart_accueil_202511081924_uatiu.mp4" type="video/mp4">
+      </video>
+      <!-- Overlay sombre pour améliorer la lisibilité -->
+      <div class="absolute inset-0 bg-black/20 pointer-events-none"></div>
+
+      <!-- Bouton Play Central (visible au chargement) -->
+      <button id="playVideoBtn" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-20 h-20 rounded-full bg-white/30 backdrop-blur-md border-4 border-white/80 flex items-center justify-center text-white transition-all hover:scale-110 active:scale-95 z-50 shadow-2xl">
+        <svg class="w-10 h-10 ml-1" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M8 5v14l11-7z"/>
+        </svg>
+      </button>
+
+      <!-- Header Overlay -->
+      <div class="absolute top-0 left-0 right-0 gradient-overlay-top px-6 pt-[calc(73px+1rem)] pb-6 z-10 pointer-events-none">
+        <div class="flex items-center justify-between">
+          <span class="px-3 py-1.5 bg-white/20 backdrop-blur-sm rounded-full text-sm font-semibold text-white">Mission 1</span>
+          <span class="px-3 py-1.5 bg-accent/80 backdrop-blur-sm rounded-full text-xs font-bold text-white">VIDEO QUIZ</span>
+        </div>
+      </div>
+
+      <!-- Footer Overlay -->
+      <div class="absolute bottom-0 left-0 right-0 gradient-overlay-bottom px-6 pb-[calc(66px+1rem)] pt-6 z-10 pointer-events-none">
+      </div>
+
+      <!-- Bouton Actions Vidéo (Toujours visible) -->
+      <div class="absolute top-1/2 right-4 transform -translate-y-1/2 flex flex-col gap-4 z-30">
+        <!-- Bouton Replay Vidéo -->
+        <button id="replayVideoBtn" class="w-11 h-11 rounded-full bg-black/40 backdrop-blur-md border border-white/20 flex items-center justify-center text-white transition-transform active:scale-90" title="Revoir la vidéo">
+          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+        </button>
+      </div>
+
+      <!-- Bouton "Quiz" (visible initialement) -->
+      <button id="showQuestionsBtn" class="absolute bottom-[160px] left-1/2 transform -translate-x-1/2 bg-accent hover:bg-accent/90 text-white px-6 py-3 rounded-full font-bold shadow-lg z-30 flex items-center gap-2 transition-all active:scale-95 animate-scale-in">
+        <span>Quiz</span>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 1.414L10.586 9H7a1 1 0 100 2h3.586l-1.293 1.293a1 1 0 101.414 1.414l3-3a1 1 0 000-1.414z" clip-rule="evenodd" />
+        </svg>
+      </button>
+
+      <!-- Questions Overlay (masqué au départ, apparaît après clic) -->
+      <div id="questionsOverlay" class="absolute inset-0 bg-black/60 backdrop-blur-md z-40 flex items-end opacity-0 pointer-events-none transition-opacity duration-500">
+        <div class="w-full p-5 pb-[100px]">
+          <div class="bg-white rounded-2xl p-5 shadow-2xl animate-scale-in">
+            <div class="flex justify-between items-center mb-4">
+              <h4 class="text-base font-bold text-gray-900 flex-1">Que dit l'agent ?</h4>
+              <!-- Icône de traduction (cachée par défaut, apparaît après réponse) -->
+              <button id="translateBtn" class="text-accent hover:text-accent/80 p-1.5 hidden transition-all" title="Voir la traduction">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+                </svg>
+              </button>
+              <!-- Bouton pour masquer temporairement les questions -->
+              <button id="hideQuestionsBtn" class="text-xs text-gray-500 hover:text-gray-800 flex items-center gap-1 p-1 ml-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                </svg>
+                Fermer
+              </button>
+            </div>
+
+            <div class="flex flex-col gap-2">
+              <button class="quiz-option w-full text-left p-3.5 rounded-xl border-2 border-gray-100 bg-gray-50 text-sm font-medium text-gray-700 hover:bg-white hover:border-gray-200 active:scale-[0.98] transition-all">
+                A) Bonjour monsieur, votre passeport s'il vous plaît.
+              </button>
+              <button class="quiz-option w-full text-left p-3.5 rounded-xl border-2 border-gray-100 bg-gray-50 text-sm font-medium text-gray-700 hover:bg-white hover:border-gray-200 active:scale-[0.98] transition-all">
+                B) Où allez-vous ?
+              </button>
+              <button class="quiz-option w-full text-left p-3.5 rounded-xl border-2 border-gray-100 bg-gray-50 text-sm font-medium text-gray-700 hover:bg-white hover:border-gray-200 active:scale-[0.98] transition-all">
+                C) Vous aimez Paris ?
+              </button>
+              <button class="quiz-option w-full text-left p-3.5 rounded-xl border-2 border-gray-100 bg-gray-50 text-sm font-medium text-gray-700 hover:bg-white hover:border-gray-200 active:scale-[0.98] transition-all">
+                D) Avez-vous quelque chose à déclarer ?
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== ACTION 2: VOICE SPELL ===== -->
+    <div class="video-card bg-gradient-to-br from-blue-600 to-blue-400">
+      <!-- Background avec image statique -->
+      <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&q=80'); filter: brightness(0.6);"></div>
+
+      <!-- Overlays pour lisibilité -->
+      <div class="absolute top-0 left-0 right-0 h-32 gradient-overlay-top pointer-events-none"></div>
+      <div class="absolute bottom-0 left-0 right-0 h-48 gradient-overlay-bottom pointer-events-none"></div>
+
+      <!-- Header Overlay -->
+      <div class="absolute top-0 left-0 right-0 px-6 pt-[calc(73px+1rem)] pb-6 z-10">
+        <div class="flex items-center justify-between">
+          <span class="px-3 py-1.5 bg-white/20 backdrop-blur-sm rounded-full text-sm font-semibold text-white">Mission 1</span>
+          <span class="px-3 py-1.5 bg-accent/80 backdrop-blur-sm rounded-full text-xs font-bold text-white uppercase">VOICE SPELL</span>
+        </div>
+      </div>
+
+      <!-- Contenu central réorganisé -->
+      <div class="absolute inset-0 flex flex-col items-center justify-center px-6 z-20 pt-10 pb-20">
+        <!-- Phrase principale -->
+        <div class="bg-black/40 backdrop-blur-md p-4 rounded-2xl border border-white/10 mb-8 max-w-sm text-center">
+          <p class="text-lg md:text-xl font-bold text-white leading-snug">
+            "Bonjour monsieur, votre passeport s'il vous plaît."
+          </p>
+        </div>
+
+        <!-- Blocs phonétiques (plus compacts et flexibles) -->
+        <div class="flex flex-wrap justify-center gap-3 w-full max-w-sm">
+          <div class="flex flex-col bg-white/90 backdrop-blur-sm rounded-xl px-5 py-3 text-center shadow-md">
+            <span class="text-base font-bold text-gray-900">Bonjour</span>
+            <span class="text-sm text-accent font-mono mt-1">/bohn-zhoor/</span>
+          </div>
+          <div class="flex flex-col bg-white/90 backdrop-blur-sm rounded-xl px-5 py-3 text-center shadow-md">
+            <span class="text-base font-bold text-gray-900">monsieur</span>
+            <span class="text-sm text-accent font-mono mt-1">/muh-syuh/</span>
+          </div>
+          <div class="flex flex-col bg-white/90 backdrop-blur-sm rounded-xl px-5 py-3 text-center shadow-md">
+            <span class="text-base font-bold text-gray-900">votre passeport</span>
+            <span class="text-sm text-accent font-mono mt-1">/vo-truh pahs-por/</span>
+          </div>
+          <div class="flex flex-col bg-white/90 backdrop-blur-sm rounded-xl px-5 py-3 text-center shadow-md">
+            <span class="text-base font-bold text-gray-900">s'il vous plaît</span>
+            <span class="text-sm text-accent font-mono mt-1">/seel voo pleh/</span>
+          </div>
+        </div>
+
+        <!-- Bouton de traduction -->
+        <div class="flex justify-center mt-6">
+          <button id="translateVoiceSpellBtn" class="w-12 h-12 rounded-full bg-accent hover:bg-accent/90 flex items-center justify-center text-white transition-all shadow-lg" title="Voir la traduction">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Footer Overlay -->
+      <div class="absolute bottom-0 left-0 right-0 px-6 pb-[calc(66px+1rem)] pt-6 z-10">
+      </div>
+    </div>
+
+    <!-- ===== ACTION 3: QUIZ (Image) ===== -->
+    <div class="video-card bg-zinc-800">
+      <!-- Background avec image statique -->
+      <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1544895860-925696c73394?w=800&q=80'); filter: brightness(0.6);"></div>
+
+      <!-- Overlays pour lisibilité -->
+      <div class="absolute top-0 left-0 right-0 h-32 gradient-overlay-top pointer-events-none"></div>
+      <div class="absolute bottom-0 left-0 right-0 h-48 gradient-overlay-bottom pointer-events-none"></div>
+
+      <!-- Header Overlay -->
+      <div class="absolute top-0 left-0 right-0 px-6 pt-[calc(73px+1rem)] pb-6 z-10">
+        <div class="flex items-center justify-between">
+          <span class="px-3 py-1.5 bg-white/20 backdrop-blur-sm rounded-full text-sm font-semibold text-white">Mission 1</span>
+          <span class="px-3 py-1.5 bg-accent/80 backdrop-blur-sm rounded-full text-xs font-bold text-white uppercase">QUIZ</span>
+        </div>
+      </div>
+
+      <!-- Conteneur principal centré verticalement -->
+      <div class="absolute inset-0 flex flex-col items-center justify-center px-6 pt-[100px] pb-[90px] z-20">
+        <!-- Question (espacée des tags) -->
+        <h3 class="text-center text-white font-bold text-lg mb-12 drop-shadow-md">
+          Associez l'image au bon mot :
+        </h3>
+
+        <!-- Bloc des options centré -->
+        <div class="flex flex-col gap-3 w-full max-w-sm">
+          <button class="quiz-option-img bg-white rounded-xl p-3 flex items-center gap-3 shadow-md active:scale-[0.98] transition-all">
+            <span class="w-8 h-8 flex items-center justify-center bg-gray-100 rounded-lg text-gray-700 font-bold text-sm">A</span>
+            <span class="text-gray-800 font-medium">Un passeport</span>
+          </button>
+          <button class="quiz-option-img bg-white rounded-xl p-3 flex items-center gap-3 shadow-md active:scale-[0.98] transition-all">
+            <span class="w-8 h-8 flex items-center justify-center bg-gray-100 rounded-lg text-gray-700 font-bold text-sm">B</span>
+            <span class="text-gray-800 font-medium">Une carte d'embarquement</span>
+          </button>
+          <button class="quiz-option-img bg-white rounded-xl p-3 flex items-center gap-3 shadow-md active:scale-[0.98] transition-all">
+            <span class="w-8 h-8 flex items-center justify-center bg-gray-100 rounded-lg text-gray-700 font-bold text-sm">C</span>
+            <span class="text-gray-800 font-medium">Un visa touristique</span>
+          </button>
+          <button class="quiz-option-img bg-white rounded-xl p-3 flex items-center gap-3 shadow-md active:scale-[0.98] transition-all">
+            <span class="w-8 h-8 flex items-center justify-center bg-gray-100 rounded-lg text-gray-700 font-bold text-sm">D</span>
+            <span class="text-gray-800 font-medium">Une carte d'identité</span>
+          </button>
+
+          <!-- Bouton de traduction (caché par défaut, apparaît après réponse) -->
+          <div class="flex justify-center mt-4">
+            <button id="translateQuizBtn" class="hidden w-12 h-12 rounded-full bg-accent hover:bg-accent/90 flex items-center justify-center text-white transition-all shadow-lg" title="Voir la traduction">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== ACTION 4: SPEAKING TASK ===== -->
+    <div class="video-card bg-zinc-900">
+      <!-- Fond plus sombre pour faire ressortir l'UI -->
+      <div class="absolute inset-0 bg-gradient-to-b from-indigo-900/40 to-black/60"></div>
+      <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5"></div>
+
+      <!-- Header Overlay -->
+      <div class="absolute top-0 left-0 right-0 px-6 pt-[calc(73px+1rem)] pb-6 z-10">
+        <div class="flex items-center justify-between">
+          <span class="px-3 py-1.5 bg-white/20 backdrop-blur-sm rounded-full text-sm font-semibold text-white">Mission 1</span>
+          <span class="px-3 py-1.5 bg-accent/80 backdrop-blur-sm rounded-full text-xs font-bold text-white uppercase">SPEAKING</span>
+        </div>
+      </div>
+
+      <div class="absolute inset-0 flex flex-col items-center justify-center px-6 z-20">
+        <!-- Bouton écouter exemple (plus petit) -->
+        <button class="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full text-white text-sm font-medium mb-8 hover:bg-white/20 transition-colors">
+          <svg class="w-4 h-4 text-accent" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" />
+          </svg>
+          Écouter l'exemple
+        </button>
+
+        <!-- Phrase à répéter (taille réduite) -->
+        <div class="text-center mb-12">
+          <p class="text-gray-400 text-xs uppercase tracking-wider font-semibold mb-3">Répétez à voix haute</p>
+          <p class="text-xl md:text-2xl font-bold text-white leading-relaxed px-4">
+            "Bonjour monsieur, votre passeport s'il vous plaît"
+          </p>
+        </div>
+
+        <!-- Bouton Micro -->
+        <div class="relative flex flex-col items-center justify-center">
+          <button id="micBtn" class="w-24 h-24 rounded-full bg-accent flex items-center justify-center shadow-[0_0_40px_-10px_rgba(45,212,191,0.5)] transition-all active:scale-95 hover:scale-105">
+            <svg id="micIcon" class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+            </svg>
+            <!-- Ondes d'animation (cachées par défaut) -->
+            <div class="sound-ring absolute inset-0 rounded-full border-2 border-red-500 opacity-0 pointer-events-none"></div>
+            <div class="sound-ring absolute inset-0 rounded-full border-2 border-red-500 opacity-0 pointer-events-none"></div>
+          </button>
+          <p id="micLabel" class="text-white/60 text-sm font-medium text-center mt-4">Appuyez pour parler</p>
+          <p id="recordTimer" class="text-red-400 text-lg font-mono font-bold text-center mt-2 hidden">00:00</p>
+        </div>
+      </div>
+    </div>
+
+  </div> <!-- Fin feed-container -->
+
+  <!-- MODALE RÉSULTAT (Hors du flux, z-index très élevé) -->
+  <div id="resultModal" class="fixed inset-0 z-[100] flex items-center justify-center px-4 pointer-events-none opacity-0 transition-opacity duration-300">
+    <!-- Backdrop sombre -->
+    <div class="absolute inset-0 bg-black/80 backdrop-blur-sm"></div>
+
+    <!-- Contenu Modale -->
+    <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl transform scale-90 transition-transform duration-300 relative">
+      <div class="text-center mb-6">
+        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <span class="text-3xl">🎉</span>
+        </div>
+        <h2 class="text-2xl font-bold text-gray-900 mb-1">Excellent !</h2>
+        <p class="text-gray-500 text-sm">Votre prononciation est très bonne.</p>
+      </div>
+
+      <!-- Scores -->
+      <div class="space-y-4 mb-6">
+        <div>
+          <div class="flex justify-between text-sm mb-1.5">
+            <span class="font-medium text-gray-700">Global</span>
+            <span class="font-bold text-accent">92%</span>
+          </div>
+          <div class="h-2.5 bg-gray-100 rounded-full overflow-hidden">
+            <div class="h-full bg-accent w-[92%] rounded-full"></div>
+          </div>
+        </div>
+        <!-- Détails (optionnels pour gagner de la place si besoin) -->
+        <div class="grid grid-cols-2 gap-4 pt-2">
+          <div class="bg-gray-50 p-3 rounded-xl text-center">
+            <span class="block text-xs text-gray-500 mb-1">Rythme</span>
+            <span class="block text-lg font-bold text-gray-800">88%</span>
+          </div>
+          <div class="bg-gray-50 p-3 rounded-xl text-center">
+            <span class="block text-xs text-gray-500 mb-1">Intonation</span>
+            <span class="block text-lg font-bold text-gray-800">95%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex gap-3">
+        <button id="retryBtn" class="flex-1 py-3 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl transition-colors active:scale-95">
+          Réessayer
+        </button>
+        <button id="continueBtn" class="flex-1 py-3 px-4 bg-accent hover:bg-accent/90 text-white font-bold rounded-xl shadow-md transition-all active:scale-95">
+          Continuer
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Navigation (Fixe, z-50) -->
+  <nav class="fixed bottom-0 left-0 right-0 bg-background border-t border-border z-50 shadow-medium rounded-t-3xl">
+    <div class="max-w-lg mx-auto px-4">
+      <div class="flex items-center justify-around py-2">
+        <a href="home.html" class="flex flex-col items-center gap-1 py-2 px-4 rounded-xl transition-smooth text-accent">
+          <svg class="h-6 w-6 transition-smooth scale-110" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          <span class="text-xs font-medium">Home</span>
+        </a>
+        <a href="podes.html" class="flex flex-col items-center gap-1 py-2 px-4 rounded-xl transition-smooth text-muted-foreground hover:text-foreground">
+          <svg class="h-6 w-6 transition-smooth" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" x2="12" y1="22.08" y2="12"/></svg>
+          <span class="text-xs font-medium">Podes</span>
+        </a>
+        <a href="leaderboard.html" class="flex flex-col items-center gap-1 py-2 px-4 rounded-xl transition-smooth text-muted-foreground hover:text-foreground">
+          <svg class="h-6 w-6 transition-smooth" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+          <span class="text-xs font-medium">Leaderboard</span>
+        </a>
+        <a href="account.html" class="flex flex-col items-center gap-1 py-2 px-4 rounded-xl transition-smooth text-muted-foreground hover:text-foreground">
+          <svg class="h-6 w-6 transition-smooth" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span class="text-xs font-medium">Account</span>
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <script>
+    // --- GESTION DU SCROLL & NAVIGATION ---
+    const feedContainer = document.querySelector('.feed-container');
+    const videoCards = document.querySelectorAll('.video-card');
+    let currentIndex = 0;
+
+    // Navigation Clavier (Desktop debug)
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowDown' && currentIndex < videoCards.length - 1) {
+        scrollToCard(currentIndex + 1);
+      } else if (e.key === 'ArrowUp' && currentIndex > 0) {
+        scrollToCard(currentIndex - 1);
+      }
+    });
+
+    function scrollToCard(index) {
+      // Mettre en pause la vidéo lors de l'autoscroll
+      if(videoQuizPlayer && !videoQuizPlayer.paused) {
+        videoQuizPlayer.pause();
+      }
+
+      currentIndex = index;
+      videoCards[currentIndex].scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Mise à jour de l'index courant lors du scroll manuel
+    let isScrolling;
+    feedContainer.addEventListener('scroll', () => {
+      // Mettre en pause la vidéo lors du scroll
+      if(videoQuizPlayer && !videoQuizPlayer.paused) {
+        videoQuizPlayer.pause();
+      }
+
+      clearTimeout(isScrolling);
+      isScrolling = setTimeout(() => {
+        const scrollPosition = feedContainer.scrollTop;
+        const cardHeight = feedContainer.clientHeight;
+        currentIndex = Math.round(scrollPosition / cardHeight);
+      }, 100);
+    });
+
+    // --- VIDEO QUIZ LOGIC ---
+    let questionsShown = false;
+    const questionsOverlay = document.getElementById('questionsOverlay');
+    const showQuestionsBtn = document.getElementById('showQuestionsBtn');
+    const hideQuestionsBtn = document.getElementById('hideQuestionsBtn');
+    const replayVideoBtn = document.getElementById('replayVideoBtn');
+    const videoQuizPlayer = document.getElementById('videoQuizPlayer');
+    const playVideoBtn = document.getElementById('playVideoBtn');
+
+    // Bouton Play Central
+    if(playVideoBtn && videoQuizPlayer) {
+      playVideoBtn.addEventListener('click', function() {
+        videoQuizPlayer.play().catch(err => console.log('Play error:', err));
+        // Faire disparaître le bouton play avec une animation
+        this.style.opacity = '0';
+        this.style.transform = 'translate(-50%, -50%) scale(1.2)';
+        setTimeout(() => {
+          this.style.display = 'none';
+        }, 300);
+      });
+    }
+
+    // Contrôle play/pause au clic sur la vidéo
+    if(videoQuizPlayer) {
+      // Rendre la vidéo interactive
+      videoQuizPlayer.style.cursor = 'pointer';
+
+      videoQuizPlayer.addEventListener('click', function(e) {
+        e.stopPropagation(); // Empêcher la propagation
+        if(this.paused) {
+          this.play().catch(err => console.log('Play error:', err));
+          // Cacher le bouton play si visible
+          if(playVideoBtn && playVideoBtn.style.display !== 'none') {
+            playVideoBtn.style.opacity = '0';
+            playVideoBtn.style.transform = 'translate(-50%, -50%) scale(1.2)';
+            setTimeout(() => {
+              playVideoBtn.style.display = 'none';
+            }, 300);
+          }
+        } else {
+          this.pause();
+        }
+      });
+    }
+
+    function showQuestions() {
+      questionsShown = true;
+      if(questionsOverlay) {
+        questionsOverlay.classList.remove('opacity-0', 'pointer-events-none');
+        questionsOverlay.classList.add('opacity-100', 'pointer-events-auto');
+      }
+      if(showQuestionsBtn) showQuestionsBtn.classList.add('hidden');
+    }
+
+    function hideQuestions() {
+      questionsShown = false;
+      if(questionsOverlay) {
+        questionsOverlay.classList.add('opacity-0', 'pointer-events-none');
+        questionsOverlay.classList.remove('opacity-100', 'pointer-events-auto');
+      }
+      if(showQuestionsBtn) showQuestionsBtn.classList.remove('hidden');
+    }
+
+    // Écouteurs Video Quiz
+    if(showQuestionsBtn) showQuestionsBtn.addEventListener('click', showQuestions);
+    if(hideQuestionsBtn) hideQuestionsBtn.addEventListener('click', hideQuestions);
+
+    if(replayVideoBtn) replayVideoBtn.addEventListener('click', () => {
+      hideQuestions();
+      // Rejouer la vidéo depuis le début
+      if(videoQuizPlayer) {
+        videoQuizPlayer.currentTime = 0;
+        videoQuizPlayer.play();
+        // Cacher le bouton play si visible
+        if(playVideoBtn && playVideoBtn.style.display !== 'none') {
+          playVideoBtn.style.opacity = '0';
+          playVideoBtn.style.transform = 'translate(-50%, -50%) scale(1.2)';
+          setTimeout(() => {
+            playVideoBtn.style.display = 'none';
+          }, 300);
+        }
+      }
+    });
+
+    // Interaction Options Quiz (Video)
+    const quizOptions = document.querySelectorAll('.quiz-option');
+    const correctAnswerIndex = 0;
+    const translateBtn = document.getElementById('translateBtn');
+
+    quizOptions.forEach((option, index) => {
+      option.addEventListener('click', function() {
+        // Reset frères
+        const siblings = this.parentElement.children;
+        for (let sib of siblings) {
+          sib.classList.remove('selected', 'correct', 'incorrect');
+          if(sib.tagName === 'BUTTON') sib.disabled = true;
+        }
+
+        // Feedback immédiat
+        const isCorrect = index === correctAnswerIndex;
+        this.classList.add(isCorrect ? 'correct' : 'incorrect');
+        if(!isCorrect && siblings[correctAnswerIndex]) {
+          siblings[correctAnswerIndex].classList.add('correct');
+        }
+
+        // Déclencher confettis si bonne réponse
+        if(isCorrect) {
+          triggerConfetti();
+        }
+
+        // Afficher l'icône de traduction après la réponse
+        if(translateBtn) {
+          translateBtn.classList.remove('hidden');
+        }
+
+        // Auto-scroll après délai
+        setTimeout(() => {
+          if (currentIndex < videoCards.length - 1) {
+            scrollToCard(currentIndex + 1);
+          }
+        }, 1500);
+      });
+    });
+
+    // --- IMAGE QUIZ LOGIC ---
+    const quizOptionsImg = document.querySelectorAll('.quiz-option-img');
+    const correctAnswerImg = 0;
+
+    quizOptionsImg.forEach((option, index) => {
+      option.addEventListener('click', function() {
+        // Reset frères
+        const siblings = this.parentElement.children;
+        for (let i = 0; i < siblings.length; i++) {
+          const sib = siblings[i];
+          if (sib.classList && sib.classList.contains('quiz-option-img')) {
+            sib.classList.remove('selected', 'correct', 'incorrect');
+            if(sib.tagName === 'BUTTON') sib.disabled = true;
+          }
+        }
+
+        // Feedback immédiat
+        const isCorrect = index === correctAnswerImg;
+        this.classList.add(isCorrect ? 'correct' : 'incorrect');
+
+        if(!isCorrect) {
+          for (let i = 0; i < siblings.length; i++) {
+            if (siblings[i].classList && siblings[i].classList.contains('quiz-option-img') && i === correctAnswerImg) {
+              siblings[i].classList.add('correct');
+            }
+          }
+        }
+
+        // Déclencher confettis si bonne réponse
+        if(isCorrect) {
+          triggerConfetti();
+        }
+
+        // Afficher le bouton de traduction après la réponse
+        const translateQuizBtn = document.getElementById('translateQuizBtn');
+        if(translateQuizBtn) {
+          translateQuizBtn.classList.remove('hidden');
+        }
+
+        // Auto-scroll après délai
+        setTimeout(() => {
+          if (currentIndex < videoCards.length - 1) {
+            scrollToCard(currentIndex + 1);
+          }
+        }, 1500);
+      });
+    });
+
+    // --- SPEAKING TASK LOGIC ---
+    const micBtn = document.getElementById('micBtn');
+    const resultModal = document.getElementById('resultModal');
+    const micLabel = document.getElementById('micLabel');
+    const recordTimer = document.getElementById('recordTimer');
+    let recording = false;
+    let recordInterval;
+
+    if(micBtn) {
+      micBtn.addEventListener('click', () => {
+        if(!recording) {
+          // Start recording simulation
+          recording = true;
+          micBtn.classList.add('recording', 'bg-red-500');
+          micBtn.classList.remove('bg-accent');
+          if(micLabel) micLabel.textContent = "Écoute en cours...";
+          if(recordTimer) recordTimer.classList.remove('hidden');
+
+          let seconds = 0;
+          if(recordTimer) recordTimer.textContent = "00:00";
+          recordInterval = setInterval(() => {
+            seconds++;
+            if(recordTimer) recordTimer.textContent = `00:${seconds.toString().padStart(2, '0')}`;
+            if(seconds >= 3) finishRecording(); // Simulation courte de 3s
+          }, 1000);
+
+        } else {
+          finishRecording();
+        }
+      });
+    }
+
+    function finishRecording() {
+      clearInterval(recordInterval);
+      recording = false;
+      if(micBtn) {
+        micBtn.classList.remove('recording', 'bg-red-500');
+        micBtn.classList.add('bg-accent');
+      }
+      if(micLabel) micLabel.textContent = "Analyse...";
+
+      // Simule délai d'analyse réseau
+      setTimeout(() => {
+        showModal();
+        if(micLabel) micLabel.textContent = "Appuyez pour parler";
+        if(recordTimer) recordTimer.classList.add('hidden');
+      }, 1500);
+    }
+
+    function showModal() {
+      if(resultModal) {
+        resultModal.classList.remove('opacity-0', 'pointer-events-none');
+        resultModal.classList.add('opacity-100', 'pointer-events-auto');
+        // Animation d'entrée du contenu
+        const modalContent = resultModal.querySelector('.bg-white');
+        if(modalContent) {
+          modalContent.classList.remove('scale-90');
+          modalContent.classList.add('scale-100');
+        }
+      }
+    }
+
+    function hideModal() {
+      if(resultModal) {
+        // Animation de sortie
+        const modalContent = resultModal.querySelector('.bg-white');
+        if(modalContent) {
+          modalContent.classList.remove('scale-100');
+          modalContent.classList.add('scale-90');
+        }
+
+        setTimeout(() => {
+          resultModal.classList.remove('opacity-100', 'pointer-events-auto');
+          resultModal.classList.add('opacity-0', 'pointer-events-none');
+        }, 200);
+      }
+    }
+
+    // Écouteurs Modale Résultat
+    const retryBtn = document.getElementById('retryBtn');
+    const continueBtn = document.getElementById('continueBtn');
+
+    if(retryBtn) retryBtn.addEventListener('click', hideModal);
+    if(continueBtn) continueBtn.addEventListener('click', () => {
+      hideModal();
+      setTimeout(() => {
+        // Boucle au début pour la démo, ou aller à une page suivante
+        scrollToCard(0);
+      }, 300);
+    });
+
+    // --- CONFETTI ANIMATION ---
+    function triggerConfetti() {
+      const duration = 2000;
+      const animationEnd = Date.now() + duration;
+      const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 200 };
+
+      function randomInRange(min, max) {
+        return Math.random() * (max - min) + min;
+      }
+
+      const interval = setInterval(function() {
+        const timeLeft = animationEnd - Date.now();
+
+        if (timeLeft <= 0) {
+          return clearInterval(interval);
+        }
+
+        const particleCount = 50 * (timeLeft / duration);
+        confetti(Object.assign({}, defaults, {
+          particleCount,
+          origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 }
+        }));
+        confetti(Object.assign({}, defaults, {
+          particleCount,
+          origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 }
+        }));
+      }, 250);
+    }
+
+    // --- TRANSLATION LOGIC ---
+    const translations = {
+      videoQuiz: {
+        question: "What does the agent say?",
+        options: [
+          "A) Hello sir, your passport please.",
+          "B) Where are you going?",
+          "C) Do you like Paris?",
+          "D) Do you have anything to declare?"
+        ]
+      },
+      quiz: {
+        question: "Match the image to the correct word:",
+        options: [
+          "A passport",
+          "A boarding pass",
+          "A tourist visa",
+          "An ID card"
+        ]
+      },
+      voiceSpell: {
+        sentence: "Hello sir, your passport please.",
+        blocks: [
+          { word: "Hello", phonetic: "/heh-loh/" },
+          { word: "sir", phonetic: "/sur/" },
+          { word: "your passport", phonetic: "/yor pas-port/" },
+          { word: "please", phonetic: "/pleez/" }
+        ]
+      }
+    };
+
+    let videoQuizTranslated = false;
+    let quizTranslated = false;
+    let voiceSpellTranslated = false;
+
+    // Video Quiz Translation
+    if(translateBtn) {
+      translateBtn.addEventListener('click', function() {
+        videoQuizTranslated = !videoQuizTranslated;
+
+        const optionEls = document.querySelectorAll('.quiz-option');
+
+        if(videoQuizTranslated) {
+          // Translate options to English (question stays in user's language)
+          optionEls.forEach((opt, i) => {
+            if(translations.videoQuiz.options[i]) {
+              opt.textContent = translations.videoQuiz.options[i];
+            }
+          });
+        } else {
+          // Back to French
+          optionEls.forEach((opt, i) => {
+            const frenchOptions = [
+              "A) Bonjour monsieur, votre passeport s'il vous plaît.",
+              "B) Où allez-vous ?",
+              "C) Vous aimez Paris ?",
+              "D) Avez-vous quelque chose à déclarer ?"
+            ];
+            if(frenchOptions[i]) {
+              opt.textContent = frenchOptions[i];
+            }
+          });
+        }
+      });
+    }
+
+    // Quiz Translation
+    const translateQuizBtn = document.getElementById('translateQuizBtn');
+    if(translateQuizBtn) {
+      translateQuizBtn.addEventListener('click', function() {
+        quizTranslated = !quizTranslated;
+
+        const optionTextEls = document.querySelectorAll('.quiz-option-img span:last-child');
+
+        if(quizTranslated) {
+          // Translate options to English (question stays in user's language)
+          optionTextEls.forEach((opt, i) => {
+            if(translations.quiz.options[i]) {
+              opt.textContent = translations.quiz.options[i];
+            }
+          });
+        } else {
+          // Back to French
+          const frenchOptions = [
+            "Un passeport",
+            "Une carte d'embarquement",
+            "Un visa touristique",
+            "Une carte d'identité"
+          ];
+          optionTextEls.forEach((opt, i) => {
+            if(frenchOptions[i]) {
+              opt.textContent = frenchOptions[i];
+            }
+          });
+        }
+      });
+    }
+
+    // Voice Spell Translation
+    const translateVoiceSpellBtn = document.getElementById('translateVoiceSpellBtn');
+    if(translateVoiceSpellBtn) {
+      translateVoiceSpellBtn.addEventListener('click', function() {
+        voiceSpellTranslated = !voiceSpellTranslated;
+
+        const sentenceEl = document.querySelector('.video-card:nth-child(2) .bg-black\\/40 p');
+        const wordEls = document.querySelectorAll('.video-card:nth-child(2) .bg-white\\/90 .text-base');
+        const phoneticEls = document.querySelectorAll('.video-card:nth-child(2) .bg-white\\/90 .font-mono');
+
+        if(voiceSpellTranslated) {
+          // Translate to English
+          if(sentenceEl) sentenceEl.textContent = '"' + translations.voiceSpell.sentence + '"';
+          wordEls.forEach((el, i) => {
+            if(translations.voiceSpell.blocks[i]) {
+              el.textContent = translations.voiceSpell.blocks[i].word;
+            }
+          });
+          phoneticEls.forEach((el, i) => {
+            if(translations.voiceSpell.blocks[i]) {
+              el.textContent = translations.voiceSpell.blocks[i].phonetic;
+            }
+          });
+        } else {
+          // Back to French
+          if(sentenceEl) sentenceEl.textContent = '"Bonjour monsieur, votre passeport s\'il vous plaît."';
+          const frenchWords = ["Bonjour", "monsieur", "votre passeport", "s'il vous plaît"];
+          const frenchPhonetics = ["/bohn-zhoor/", "/muh-syuh/", "/vo-truh pahs-por/", "/seel voo pleh/"];
+          wordEls.forEach((el, i) => {
+            if(frenchWords[i]) {
+              el.textContent = frenchWords[i];
+            }
+          });
+          phoneticEls.forEach((el, i) => {
+            if(frenchPhonetics[i]) {
+              el.textContent = frenchPhonetics[i];
+            }
+          });
+        }
+      });
+    }
+  </script>
+  <!-- Podelli Scripts -->
+  <script src="/assets/js/utils.js"></script>
+  <script src="/assets/js/auth.js"></script>
+  <script src="/assets/js/api.js"></script>
+</body>
+</html>

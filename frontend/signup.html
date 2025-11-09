@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inscription - Podelli</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- TailwindCSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+
+  <!-- TailwindCSS Configuration -->
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          },
+          colors: {
+            border: 'hsl(0 0% 89%)',
+            background: 'hsl(0 0% 100%)',
+            foreground: 'hsl(0 0% 0%)',
+            primary: {
+              DEFAULT: 'hsl(0 0% 0%)',
+              foreground: 'hsl(0 0% 100%)',
+            },
+            secondary: {
+              DEFAULT: 'hsl(0 0% 97%)',
+              foreground: 'hsl(0 0% 0%)',
+            },
+            muted: {
+              DEFAULT: 'hsl(0 0% 96%)',
+              foreground: 'hsl(0 0% 40%)',
+            },
+            accent: {
+              DEFAULT: 'hsl(164 86% 45%)',
+              foreground: 'hsl(0 0% 100%)',
+            },
+          },
+          keyframes: {
+            'fade-in': {
+              '0%': { opacity: '0', transform: 'translateY(10px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
+            },
+            'scale-in': {
+              '0%': { transform: 'scale(0.95)', opacity: '0' },
+              '100%': { transform: 'scale(1)', opacity: '1' },
+            },
+          },
+          animation: {
+            'fade-in': 'fade-in 0.5s ease-out',
+            'scale-in': 'scale-in 0.3s ease-out',
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    * { border-color: hsl(0 0% 89%); }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    h1, h2, h3, h4, h5, h6 { font-weight: 700; }
+    .shadow-soft { box-shadow: 0 2px 16px -4px rgba(0, 0, 0, 0.06); }
+    .shadow-medium { box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.1); }
+    .transition-smooth { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+
+    .input-field {
+      transition: all 0.3s ease;
+    }
+
+    .input-field:focus {
+      border-color: hsl(164 86% 45%);
+      box-shadow: 0 0 0 3px hsla(164, 86%, 45%, 0.1);
+    }
+
+    .btn-primary {
+      background: hsl(164 86% 45%);
+      color: white;
+      transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: hsl(164 86% 40%);
+      transform: translateY(-1px);
+      box-shadow: 0 8px 16px -4px hsla(164, 86%, 45%, 0.4);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      text-align: center;
+      color: hsl(0 0% 60%);
+    }
+
+    .divider::before,
+    .divider::after {
+      content: '';
+      flex: 1;
+      border-bottom: 1px solid hsl(0 0% 89%);
+    }
+
+    .divider::before {
+      margin-right: 1rem;
+    }
+
+    .divider::after {
+      margin-left: 1rem;
+    }
+
+    .social-btn {
+      border: 2px solid hsl(0 0% 89%);
+      transition: all 0.3s ease;
+    }
+
+    .social-btn:hover {
+      border-color: hsl(0 0% 70%);
+      background: hsl(0 0% 98%);
+      transform: translateY(-1px);
+    }
+
+    .password-strength {
+      height: 4px;
+      border-radius: 2px;
+      background: hsl(0 0% 93%);
+      overflow: hidden;
+      margin-top: 8px;
+    }
+
+    .password-strength-bar {
+      height: 100%;
+      transition: all 0.3s ease;
+      border-radius: 2px;
+    }
+
+    .strength-weak {
+      width: 33%;
+      background: #ef4444;
+    }
+
+    .strength-medium {
+      width: 66%;
+      background: #f59e0b;
+    }
+
+    .strength-strong {
+      width: 100%;
+      background: #10b981;
+    }
+  </style>
+</head>
+
+<body class="bg-background text-foreground">
+  <!-- Main Content -->
+  <main class="min-h-screen flex items-center justify-center px-6 py-12">
+    <div class="w-full max-w-md animate-fade-in">
+      <!-- Logo & Title -->
+      <div class="text-center mb-8">
+        <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-primary flex items-center justify-center">
+          <svg class="h-8 w-8 text-primary-foreground" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg>
+        </div>
+        <h1 class="text-3xl font-bold mb-2">Créer un compte</h1>
+        <p class="text-muted-foreground">Commencez votre voyage d'apprentissage</p>
+      </div>
+
+      <!-- Sign Up Form -->
+      <div class="bg-white rounded-3xl border-2 shadow-medium p-8 animate-scale-in">
+        <form id="signupForm" class="space-y-5">
+          <!-- Name Field -->
+          <div>
+            <label for="name" class="block text-sm font-semibold mb-2">Nom complet</label>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              class="input-field w-full px-4 py-3 rounded-xl border-2 outline-none"
+              placeholder="Jean Dupont"
+              required
+            >
+          </div>
+
+          <!-- Email Field -->
+          <div>
+            <label for="email" class="block text-sm font-semibold mb-2">Email</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              class="input-field w-full px-4 py-3 rounded-xl border-2 outline-none"
+              placeholder="votre@email.com"
+              required
+            >
+          </div>
+
+          <!-- Password Field -->
+          <div>
+            <label for="password" class="block text-sm font-semibold mb-2">Mot de passe</label>
+            <div class="relative">
+              <input
+                type="password"
+                id="password"
+                name="password"
+                class="input-field w-full px-4 py-3 rounded-xl border-2 outline-none"
+                placeholder="••••••••"
+                required
+                minlength="8"
+                oninput="checkPasswordStrength()"
+              >
+              <button
+                type="button"
+                onclick="togglePassword('password')"
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-smooth"
+              >
+                <svg id="eyeIconPassword" class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+            <!-- Password Strength Indicator -->
+            <div class="password-strength">
+              <div id="passwordStrengthBar" class="password-strength-bar"></div>
+            </div>
+            <p id="passwordStrengthText" class="text-xs text-muted-foreground mt-1"></p>
+          </div>
+
+          <!-- Confirm Password Field -->
+          <div>
+            <label for="confirmPassword" class="block text-sm font-semibold mb-2">Confirmer le mot de passe</label>
+            <div class="relative">
+              <input
+                type="password"
+                id="confirmPassword"
+                name="confirmPassword"
+                class="input-field w-full px-4 py-3 rounded-xl border-2 outline-none"
+                placeholder="••••••••"
+                required
+              >
+              <button
+                type="button"
+                onclick="togglePassword('confirmPassword')"
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-smooth"
+              >
+                <svg id="eyeIconConfirm" class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Terms & Conditions -->
+          <div>
+            <label class="flex items-start gap-2 cursor-pointer">
+              <input type="checkbox" id="terms" class="w-4 h-4 mt-0.5 rounded border-2 text-accent focus:ring-accent" required>
+              <span class="text-sm text-muted-foreground">
+                J'accepte les
+                <a href="#" class="text-accent hover:text-accent/80 font-medium">Conditions d'utilisation</a>
+                et la
+                <a href="#" class="text-accent hover:text-accent/80 font-medium">Politique de confidentialité</a>
+              </span>
+            </label>
+          </div>
+
+          <!-- Submit Button -->
+          <button
+            type="submit"
+            class="btn-primary w-full py-3 px-6 rounded-full font-bold text-base"
+          >
+            Créer mon compte
+          </button>
+        </form>
+
+        <!-- Divider -->
+        <div class="divider my-6 text-sm">ou continuer avec</div>
+
+        <!-- Social Login Buttons -->
+        <div class="space-y-3">
+          <!-- Google -->
+          <button class="social-btn w-full py-3 px-6 rounded-full font-medium flex items-center justify-center gap-3">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+              <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+              <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+              <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+            </svg>
+            Google
+          </button>
+
+          <!-- Facebook -->
+          <button class="social-btn w-full py-3 px-6 rounded-full font-medium flex items-center justify-center gap-3">
+            <svg class="w-5 h-5" fill="#1877F2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+            </svg>
+            Facebook
+          </button>
+
+          <!-- Apple -->
+          <button class="social-btn w-full py-3 px-6 rounded-full font-medium flex items-center justify-center gap-3">
+            <svg class="w-5 h-5" fill="#000000" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
+            </svg>
+            Apple
+          </button>
+        </div>
+
+        <!-- Sign In Link -->
+        <div class="text-center mt-6">
+          <p class="text-sm text-muted-foreground">
+            Déjà un compte ?
+            <a href="signin.html" class="font-bold text-accent hover:text-accent/80 transition-smooth ml-1">
+              Se connecter
+            </a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Toggle password visibility
+    function togglePassword(fieldId) {
+      const passwordInput = document.getElementById(fieldId);
+      const eyeIcon = document.getElementById(fieldId === 'password' ? 'eyeIconPassword' : 'eyeIconConfirm');
+
+      if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        eyeIcon.innerHTML = '<path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/>';
+      } else {
+        passwordInput.type = 'password';
+        eyeIcon.innerHTML = '<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>';
+      }
+    }
+
+    // Check password strength
+    function checkPasswordStrength() {
+      const password = document.getElementById('password').value;
+      const strengthBar = document.getElementById('passwordStrengthBar');
+      const strengthText = document.getElementById('passwordStrengthText');
+
+      if (password.length === 0) {
+        strengthBar.className = 'password-strength-bar';
+        strengthText.textContent = '';
+        return;
+      }
+
+      let strength = 0;
+
+      // Length check
+      if (password.length >= 8) strength++;
+      if (password.length >= 12) strength++;
+
+      // Character variety checks
+      if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
+      if (/[0-9]/.test(password)) strength++;
+      if (/[^a-zA-Z0-9]/.test(password)) strength++;
+
+      if (strength <= 2) {
+        strengthBar.className = 'password-strength-bar strength-weak';
+        strengthText.textContent = 'Mot de passe faible';
+        strengthText.style.color = '#ef4444';
+      } else if (strength <= 4) {
+        strengthBar.className = 'password-strength-bar strength-medium';
+        strengthText.textContent = 'Mot de passe moyen';
+        strengthText.style.color = '#f59e0b';
+      } else {
+        strengthBar.className = 'password-strength-bar strength-strong';
+        strengthText.textContent = 'Mot de passe fort';
+        strengthText.style.color = '#10b981';
+      }
+    }
+
+    // Handle form submission
+    document.getElementById('signupForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const name = document.getElementById('name').value;
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+      const terms = document.getElementById('terms').checked;
+
+      // Validate passwords match
+      if (password !== confirmPassword) {
+        alert('Les mots de passe ne correspondent pas');
+        return;
+      }
+
+      // Validate terms accepted
+      if (!terms) {
+        alert('Veuillez accepter les conditions d\'utilisation');
+        return;
+      }
+
+      // TODO: Implement actual sign up logic
+      console.log('Sign up attempt:', { name, email, password });
+
+      // For now, redirect to onboarding page
+      window.location.href = 'onboarding.html';
+    });
+  </script>
+  <!-- Podelli Scripts -->
+  <script src="/assets/js/utils.js"></script>
+  <script src="/assets/js/auth.js"></script>
+  <script src="/assets/js/api.js"></script>
+</body>
+</html>

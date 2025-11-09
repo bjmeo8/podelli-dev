@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Account - Podelli</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+          colors: {
+            border: 'hsl(0 0% 89%)', background: 'hsl(0 0% 100%)', foreground: 'hsl(0 0% 0%)',
+            primary: { DEFAULT: 'hsl(0 0% 0%)', foreground: 'hsl(0 0% 100%)' },
+            secondary: { DEFAULT: 'hsl(0 0% 97%)', foreground: 'hsl(0 0% 0%)' },
+            muted: { DEFAULT: 'hsl(0 0% 96%)', foreground: 'hsl(0 0% 40%)' },
+            accent: { DEFAULT: 'hsl(164 86% 45%)', foreground: 'hsl(0 0% 100%)' },
+          },
+          keyframes: {
+            'fade-in': { '0%': { opacity: '0', transform: 'translateY(10px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
+            'scale-in': { '0%': { transform: 'scale(0.95)', opacity: '0' }, '100%': { transform: 'scale(1)', opacity: '1' } },
+          },
+          animation: { 'fade-in': 'fade-in 0.5s ease-out', 'scale-in': 'scale-in 0.3s ease-out' },
+        },
+      },
+    }
+  </script>
+  <style>
+    * { border-color: hsl(0 0% 89%); }
+    body { font-family: 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+    h1, h2, h3, h4, h5, h6 { font-weight: 700; }
+    .shadow-soft { box-shadow: 0 2px 16px -4px rgba(0, 0, 0, 0.06); }
+    .shadow-medium { box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.1); }
+    .transition-smooth { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+  </style>
+</head>
+<body class="bg-background text-foreground">
+  <header class="bg-background border-b border-border sticky top-0 z-40 shadow-soft rounded-b-3xl">
+    <div class="max-w-lg mx-auto px-6 py-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
+            <svg class="h-5 w-5 text-primary-foreground" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg>
+          </div>
+          <h1 class="text-2xl font-bold">Podelli</h1>
+        </div>
+        <span class="text-xs font-bold px-3 py-1.5 bg-primary text-primary-foreground rounded-full">AI POWERED</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-lg mx-auto px-6 pt-8 pb-24">
+    <div class="space-y-6 animate-fade-in">
+      <div class="p-6 rounded-3xl border-2 bg-white">
+        <div class="flex items-center gap-4 mb-4">
+          <div class="w-20 h-20 rounded-full bg-gradient-to-br from-accent to-accent/60 flex items-center justify-center">
+            <svg class="h-10 w-10 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <div class="flex-1">
+            <h3 class="text-2xl font-bold">Sarah Johnson</h3>
+            <p class="text-muted-foreground">sarah.j@email.com</p>
+          </div>
+        </div>
+        <div class="grid grid-cols-3 gap-4 pt-4 border-t">
+          <div class="text-center"><div class="text-xl font-bold text-accent">47</div><div class="text-xs text-muted-foreground">Day Streak</div></div>
+          <div class="text-center"><div class="text-xl font-bold text-accent">2,450</div><div class="text-xs text-muted-foreground">Points</div></div>
+          <div class="text-center"><div class="text-xl font-bold text-accent">12</div><div class="text-xs text-muted-foreground">Badges</div></div>
+        </div>
+      </div>
+
+      <div class="p-6 rounded-3xl border-2 bg-gradient-to-br from-accent/10 to-accent/5">
+        <div class="flex items-center gap-3 mb-4">
+          <svg class="h-6 w-6 text-accent" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+          <h3 class="text-lg font-bold">Recent Achievement</h3>
+        </div>
+        <p class="text-muted-foreground mb-2">🎉 Completed 30-day learning streak!</p>
+        <p class="text-sm text-muted-foreground">Keep going to unlock more rewards</p>
+      </div>
+
+      <div class="space-y-2">
+        <div class="p-4 rounded-2xl border hover:shadow-medium transition-smooth cursor-pointer animate-scale-in bg-white" style="animation-delay: 0ms">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-secondary flex items-center justify-center">
+              <svg class="h-5 w-5 text-accent" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+            </div>
+            <div class="flex-1"><h4 class="font-semibold">Settings</h4><p class="text-sm text-muted-foreground">Preferences & more</p></div>
+          </div>
+        </div>
+
+        <div class="p-4 rounded-2xl border hover:shadow-medium transition-smooth cursor-pointer animate-scale-in bg-white" style="animation-delay: 50ms">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-secondary flex items-center justify-center">
+              <svg class="h-5 w-5 text-accent" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg>
+            </div>
+            <div class="flex-1"><h4 class="font-semibold">My Languages</h4><p class="text-sm text-muted-foreground">Manage learning languages</p></div>
+          </div>
+        </div>
+
+        <div class="p-4 rounded-2xl border hover:shadow-medium transition-smooth cursor-pointer animate-scale-in bg-white" style="animation-delay: 100ms">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-secondary flex items-center justify-center">
+              <svg class="h-5 w-5 text-accent" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+            </div>
+            <div class="flex-1"><h4 class="font-semibold">Notifications</h4><p class="text-sm text-muted-foreground">Reminders & alerts</p></div>
+          </div>
+        </div>
+
+        <div class="p-4 rounded-2xl border hover:shadow-medium transition-smooth cursor-pointer animate-scale-in bg-white" style="animation-delay: 150ms">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-secondary flex items-center justify-center">
+              <svg class="h-5 w-5 text-accent" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/></svg>
+            </div>
+            <div class="flex-1"><h4 class="font-semibold">Privacy</h4><p class="text-sm text-muted-foreground">Security settings</p></div>
+          </div>
+        </div>
+
+        <div class="p-4 rounded-2xl border hover:shadow-medium transition-smooth cursor-pointer animate-scale-in bg-white" style="animation-delay: 200ms">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-secondary flex items-center justify-center">
+              <svg class="h-5 w-5 text-accent" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+            </div>
+            <div class="flex-1"><h4 class="font-semibold">Help & Support</h4><p class="text-sm text-muted-foreground">Get assistance</p></div>
+          </div>
+        </div>
+      </div>
+
+      <button class="w-full rounded-full border-2 h-11 px-8 inline-flex items-center justify-center gap-2 font-medium transition-smooth border-input bg-background hover:bg-accent hover:text-accent-foreground">
+        <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+        Log Out
+      </button>
+    </div>
+  </main>
+
+  <nav class="fixed bottom-0 left-0 right-0 bg-background border-t border-border z-50 shadow-medium rounded-t-3xl">
+    <div class="max-w-lg mx-auto px-4">
+      <div class="flex items-center justify-around py-2">
+        <a href="home.html" class="flex flex-col items-center gap-1 py-2 px-4 rounded-xl transition-smooth text-muted-foreground hover:text-foreground">
+          <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          <span class="text-xs font-medium">Home</span>
+        </a>
+        <a href="podes.html" class="flex flex-col items-center gap-1 py-2 px-4 rounded-xl transition-smooth text-muted-foreground hover:text-foreground">
+          <svg class="h-6 w-6 transition-smooth" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" x2="12" y1="22.08" y2="12"/></svg>
+          <span class="text-xs font-medium">Podes</span>
+        </a>
+        <a href="leaderboard.html" class="flex flex-col items-center gap-1 py-2 px-4 rounded-xl transition-smooth text-muted-foreground hover:text-foreground">
+          <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+          <span class="text-xs font-medium">Leaderboard</span>
+        </a>
+        <a href="account.html" class="flex flex-col items-center gap-1 py-2 px-4 rounded-xl transition-smooth text-accent">
+          <svg class="h-6 w-6 scale-110" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span class="text-xs font-medium">Account</span>
+        </a>
+      </div>
+    </div>
+  </nav>
+</body>
+</html>

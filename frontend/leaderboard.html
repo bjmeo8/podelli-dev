@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Leaderboard - Podelli</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+          colors: {
+            border: 'hsl(0 0% 89%)', background: 'hsl(0 0% 100%)', foreground: 'hsl(0 0% 0%)',
+            primary: { DEFAULT: 'hsl(0 0% 0%)', foreground: 'hsl(0 0% 100%)' },
+            secondary: { DEFAULT: 'hsl(0 0% 97%)', foreground: 'hsl(0 0% 0%)' },
+            muted: { DEFAULT: 'hsl(0 0% 96%)', foreground: 'hsl(0 0% 40%)' },
+            accent: { DEFAULT: 'hsl(164 86% 45%)', foreground: 'hsl(0 0% 100%)' },
+          },
+          keyframes: {
+            'fade-in': { '0%': { opacity: '0', transform: 'translateY(10px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
+            'scale-in': { '0%': { transform: 'scale(0.95)', opacity: '0' }, '100%': { transform: 'scale(1)', opacity: '1' } },
+          },
+          animation: { 'fade-in': 'fade-in 0.5s ease-out', 'scale-in': 'scale-in 0.3s ease-out' },
+        },
+      },
+    }
+  </script>
+  <style>
+    * { border-color: hsl(0 0% 89%); }
+    body { font-family: 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+    h1, h2, h3, h4, h5, h6 { font-weight: 700; }
+    .shadow-soft { box-shadow: 0 2px 16px -4px rgba(0, 0, 0, 0.06); }
+    .shadow-medium { box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.1); }
+    .transition-smooth { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+  </style>
+</head>
+<body class="bg-background text-foreground">
+  <header class="bg-background border-b border-border sticky top-0 z-40 shadow-soft rounded-b-3xl">
+    <div class="max-w-lg mx-auto px-6 py-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
+            <svg class="h-5 w-5 text-primary-foreground" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg>
+          </div>
+          <h1 class="text-2xl font-bold">Podelli</h1>
+        </div>
+        <span class="text-xs font-bold px-3 py-1.5 bg-primary text-primary-foreground rounded-full">AI POWERED</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-lg mx-auto px-6 pt-8 pb-24">
+    <div class="space-y-6 animate-fade-in">
+      <div>
+        <h2 class="text-4xl font-bold mb-2">Leaderboard</h2>
+        <p class="text-muted-foreground">Compete with learners worldwide</p>
+      </div>
+
+      <!-- Your Rank Card -->
+      <div class="p-6 rounded-3xl bg-gradient-to-br from-accent/20 to-accent/5 border-2 border-accent/20">
+        <div class="flex items-center gap-4">
+          <div class="flex-shrink-0">
+            <div class="w-16 h-16 rounded-full bg-accent flex items-center justify-center">
+              <span class="text-2xl font-bold text-white">🏆</span>
+            </div>
+          </div>
+          <div class="flex-1">
+            <p class="text-sm text-muted-foreground mb-1">Your Rank</p>
+            <h3 class="text-3xl font-bold text-accent">#42</h3>
+            <p class="text-sm text-muted-foreground">2,450 points this week</p>
+          </div>
+          <div class="text-right">
+            <p class="text-sm text-muted-foreground mb-1">Level</p>
+            <div class="text-2xl font-bold">12</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Time Filter -->
+      <div class="flex gap-2 overflow-x-auto pb-2">
+        <button class="px-4 py-2 rounded-full bg-primary text-primary-foreground text-sm font-medium whitespace-nowrap">All Time</button>
+        <button class="px-4 py-2 rounded-full bg-secondary hover:bg-muted text-foreground text-sm font-medium whitespace-nowrap transition-smooth">This Week</button>
+        <button class="px-4 py-2 rounded-full bg-secondary hover:bg-muted text-foreground text-sm font-medium whitespace-nowrap transition-smooth">Today</button>
+      </div>
+
+      <!-- Leaderboard List -->
+      <div class="space-y-3">
+        <h3 class="text-xl font-bold">Top Learners</h3>
+
+        <!-- Rank 1 -->
+        <div class="p-5 rounded-3xl bg-gradient-to-br from-yellow-100 to-yellow-50 border-2 border-yellow-300 animate-scale-in" style="animation-delay: 0ms">
+          <div class="flex items-center gap-4">
+            <div class="flex-shrink-0 relative">
+              <div class="w-12 h-12 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center text-white font-bold text-lg">
+                SM
+              </div>
+              <div class="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-yellow-400 flex items-center justify-center text-xs">🥇</div>
+            </div>
+            <div class="flex-1 min-w-0">
+              <h4 class="font-bold truncate">Sarah Martin</h4>
+              <p class="text-sm text-muted-foreground">Level 28 • 🇫🇷 French</p>
+            </div>
+            <div class="text-right flex-shrink-0">
+              <div class="text-xl font-bold text-yellow-600">15,240</div>
+              <p class="text-xs text-muted-foreground">points</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Rank 2 -->
+        <div class="p-5 rounded-3xl bg-gradient-to-br from-gray-100 to-gray-50 border-2 border-gray-300 animate-scale-in hover:shadow-medium transition-smooth cursor-pointer bg-white" style="animation-delay: 50ms">
+          <div class="flex items-center gap-4">
+            <div class="flex-shrink-0 relative">
+              <div class="w-12 h-12 rounded-full bg-gradient-to-br from-gray-300 to-gray-500 flex items-center justify-center text-white font-bold text-lg">
+                JD
+              </div>
+              <div class="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-gray-400 flex items-center justify-center text-xs">🥈</div>
+            </div>
+            <div class="flex-1 min-w-0">
+              <h4 class="font-bold truncate">John Davis</h4>
+              <p class="text-sm text-muted-foreground">Level 25 • 🇪🇸 Spanish</p>
+            </div>
+            <div class="text-right flex-shrink-0">
+              <div class="text-xl font-bold text-gray-600">14,890</div>
+              <p class="text-xs text-muted-foreground">points</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Rank 3 -->
+        <div class="p-5 rounded-3xl bg-gradient-to-br from-orange-100 to-orange-50 border-2 border-orange-300 animate-scale-in hover:shadow-medium transition-smooth cursor-pointer bg-white" style="animation-delay: 100ms">
+          <div class="flex items-center gap-4">
+            <div class="flex-shrink-0 relative">
+              <div class="w-12 h-12 rounded-full bg-gradient-to-br from-orange-300 to-orange-500 flex items-center justify-center text-white font-bold text-lg">
+                EL
+              </div>
+              <div class="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-orange-400 flex items-center justify-center text-xs">🥉</div>
+            </div>
+            <div class="flex-1 min-w-0">
+              <h4 class="font-bold truncate">Emma Lee</h4>
+              <p class="text-sm text-muted-foreground">Level 24 • 🇯🇵 Japanese</p>
+            </div>
+            <div class="text-right flex-shrink-0">
+              <div class="text-xl font-bold text-orange-600">13,560</div>
+              <p class="text-xs text-muted-foreground">points</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Rank 4-10 -->
+        <div class="p-4 rounded-3xl border-2 hover:shadow-medium transition-smooth cursor-pointer animate-scale-in bg-white" style="animation-delay: 150ms">
+          <div class="flex items-center gap-4">
+            <div class="w-8 flex-shrink-0 text-center">
+              <span class="text-lg font-bold text-muted-foreground">4</span>
+            </div>
+            <div class="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold flex-shrink-0">MC</div>
+            <div class="flex-1 min-w-0">
+              <h4 class="font-semibold truncate">Michael Chen</h4>
+              <p class="text-xs text-muted-foreground">Level 22 • 🇩🇪 German</p>
+            </div>
+            <div class="text-right flex-shrink-0">
+              <div class="font-bold">12,340</div>
+              <p class="text-xs text-muted-foreground">pts</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-4 rounded-3xl border-2 hover:shadow-medium transition-smooth cursor-pointer animate-scale-in bg-white" style="animation-delay: 200ms">
+          <div class="flex items-center gap-4">
+            <div class="w-8 flex-shrink-0 text-center">
+              <span class="text-lg font-bold text-muted-foreground">5</span>
+            </div>
+            <div class="w-10 h-10 rounded-full bg-purple-500 flex items-center justify-center text-white font-bold flex-shrink-0">LW</div>
+            <div class="flex-1 min-w-0">
+              <h4 class="font-semibold truncate">Lisa Wang</h4>
+              <p class="text-xs text-muted-foreground">Level 21 • 🇮🇹 Italian</p>
+            </div>
+            <div class="text-right flex-shrink-0">
+              <div class="font-bold">11,890</div>
+              <p class="text-xs text-muted-foreground">pts</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-4 rounded-3xl border-2 hover:shadow-medium transition-smooth cursor-pointer animate-scale-in bg-white" style="animation-delay: 250ms">
+          <div class="flex items-center gap-4">
+            <div class="w-8 flex-shrink-0 text-center">
+              <span class="text-lg font-bold text-muted-foreground">6</span>
+            </div>
+            <div class="w-10 h-10 rounded-full bg-pink-500 flex items-center justify-center text-white font-bold flex-shrink-0">AJ</div>
+            <div class="flex-1 min-w-0">
+              <h4 class="font-semibold truncate">Alex Johnson</h4>
+              <p class="text-xs text-muted-foreground">Level 20 • 🇫🇷 French</p>
+            </div>
+            <div class="text-right flex-shrink-0">
+              <div class="font-bold">10,750</div>
+              <p class="text-xs text-muted-foreground">pts</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-4 rounded-3xl border-2 hover:shadow-medium transition-smooth cursor-pointer animate-scale-in bg-white" style="animation-delay: 300ms">
+          <div class="flex items-center gap-4">
+            <div class="w-8 flex-shrink-0 text-center">
+              <span class="text-lg font-bold text-muted-foreground">7</span>
+            </div>
+            <div class="w-10 h-10 rounded-full bg-emerald-500 flex items-center justify-center text-white font-bold flex-shrink-0">TB</div>
+            <div class="flex-1 min-w-0">
+              <h4 class="font-semibold truncate">Thomas Brown</h4>
+              <p class="text-xs text-muted-foreground">Level 19 • 🇪🇸 Spanish</p>
+            </div>
+            <div class="text-right flex-shrink-0">
+              <div class="font-bold">9,620</div>
+              <p class="text-xs text-muted-foreground">pts</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-4 rounded-3xl border-2 hover:shadow-medium transition-smooth cursor-pointer animate-scale-in bg-white" style="animation-delay: 350ms">
+          <div class="flex items-center gap-4">
+            <div class="w-8 flex-shrink-0 text-center">
+              <span class="text-lg font-bold text-muted-foreground">8</span>
+            </div>
+            <div class="w-10 h-10 rounded-full bg-red-500 flex items-center justify-center text-white font-bold flex-shrink-0">NG</div>
+            <div class="flex-1 min-w-0">
+              <h4 class="font-semibold truncate">Nina Garcia</h4>
+              <p class="text-xs text-muted-foreground">Level 18 • 🇯🇵 Japanese</p>
+            </div>
+            <div class="text-right flex-shrink-0">
+              <div class="font-bold">8,940</div>
+              <p class="text-xs text-muted-foreground">pts</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-4 rounded-3xl border-2 hover:shadow-medium transition-smooth cursor-pointer animate-scale-in bg-white" style="animation-delay: 400ms">
+          <div class="flex items-center gap-4">
+            <div class="w-8 flex-shrink-0 text-center">
+              <span class="text-lg font-bold text-muted-foreground">9</span>
+            </div>
+            <div class="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center text-white font-bold flex-shrink-0">DP</div>
+            <div class="flex-1 min-w-0">
+              <h4 class="font-semibold truncate">David Park</h4>
+              <p class="text-xs text-muted-foreground">Level 17 • 🇩🇪 German</p>
+            </div>
+            <div class="text-right flex-shrink-0">
+              <div class="font-bold">7,830</div>
+              <p class="text-xs text-muted-foreground">pts</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-4 rounded-3xl border-2 hover:shadow-medium transition-smooth cursor-pointer animate-scale-in bg-white" style="animation-delay: 450ms">
+          <div class="flex items-center gap-4">
+            <div class="w-8 flex-shrink-0 text-center">
+              <span class="text-lg font-bold text-muted-foreground">10</span>
+            </div>
+            <div class="w-10 h-10 rounded-full bg-teal-500 flex items-center justify-center text-white font-bold flex-shrink-0">OS</div>
+            <div class="flex-1 min-w-0">
+              <h4 class="font-semibold truncate">Olivia Smith</h4>
+              <p class="text-xs text-muted-foreground">Level 16 • 🇮🇹 Italian</p>
+            </div>
+            <div class="text-right flex-shrink-0">
+              <div class="font-bold">6,720</div>
+              <p class="text-xs text-muted-foreground">pts</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <nav class="fixed bottom-0 left-0 right-0 bg-background border-t border-border z-50 shadow-medium rounded-t-3xl">
+    <div class="max-w-lg mx-auto px-4">
+      <div class="flex items-center justify-around py-2">
+        <a href="home.html" class="flex flex-col items-center gap-1 py-2 px-4 rounded-xl transition-smooth text-muted-foreground hover:text-foreground">
+          <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          <span class="text-xs font-medium">Home</span>
+        </a>
+        <a href="podes.html" class="flex flex-col items-center gap-1 py-2 px-4 rounded-xl transition-smooth text-muted-foreground hover:text-foreground">
+          <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" x2="12" y1="22.08" y2="12"/></svg>
+          <span class="text-xs font-medium">Podes</span>
+        </a>
+        <a href="leaderboard.html" class="flex flex-col items-center gap-1 py-2 px-4 rounded-xl transition-smooth text-accent">
+          <svg class="h-6 w-6 scale-110" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+          <span class="text-xs font-medium">Leaderboard</span>
+        </a>
+        <a href="account.html" class="flex flex-col items-center gap-1 py-2 px-4 rounded-xl transition-smooth text-muted-foreground hover:text-foreground">
+          <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span class="text-xs font-medium">Account</span>
+        </a>
+      </div>
+    </div>
+  </nav>
+  <!-- Podelli Scripts -->
+  <script src="/assets/js/utils.js"></script>
+  <script src="/assets/js/auth.js"></script>
+  <script src="/assets/js/api.js"></script>
+</body>
+</html>

@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mes Podes - Podelli</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- TailwindCSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+
+  <!-- TailwindCSS Configuration -->
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          },
+          colors: {
+            border: 'hsl(0 0% 89%)',
+            background: 'hsl(0 0% 100%)',
+            foreground: 'hsl(0 0% 0%)',
+            primary: {
+              DEFAULT: 'hsl(0 0% 0%)',
+              foreground: 'hsl(0 0% 100%)',
+            },
+            secondary: {
+              DEFAULT: 'hsl(0 0% 97%)',
+              foreground: 'hsl(0 0% 0%)',
+            },
+            muted: {
+              DEFAULT: 'hsl(0 0% 96%)',
+              foreground: 'hsl(0 0% 40%)',
+            },
+            accent: {
+              DEFAULT: 'hsl(164 86% 45%)',
+              foreground: 'hsl(0 0% 100%)',
+            },
+          },
+          keyframes: {
+            'fade-in': {
+              '0%': { opacity: '0', transform: 'translateY(10px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
+            },
+            'scale-in': {
+              '0%': { transform: 'scale(0.95)', opacity: '0' },
+              '100%': { transform: 'scale(1)', opacity: '1' },
+            },
+            'float': {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-10px)' },
+            },
+          },
+          animation: {
+            'fade-in': 'fade-in 0.5s ease-out',
+            'scale-in': 'scale-in 0.3s ease-out',
+            'float': 'float 3s ease-in-out infinite',
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    * { border-color: hsl(0 0% 89%); }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    h1, h2, h3, h4, h5, h6 { font-weight: 700; }
+    .shadow-soft { box-shadow: 0 2px 16px -4px rgba(0, 0, 0, 0.06); }
+    .shadow-medium { box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.1); }
+    .shadow-strong { box-shadow: 0 12px 32px -12px rgba(0, 0, 0, 0.15); }
+    .transition-smooth { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+
+    .mission-card {
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      aspect-ratio: 1;
+    }
+
+    .mission-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.1) 30%, rgba(0,0,0,0.4) 70%, rgba(0,0,0,0.8) 100%);
+      z-index: 1;
+    }
+
+    .mission-card img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .mission-card:hover img {
+      transform: scale(1.05);
+    }
+
+    .mission-card-content {
+      position: relative;
+      z-index: 2;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 1rem;
+    }
+
+    /* Mobile Responsive Fixes */
+    @media (max-width: 640px) {
+      .mission-card-content {
+        padding: 0.75rem;
+      }
+
+      .mission-badge {
+        font-size: 0.65rem !important;
+        padding: 0.25rem 0.5rem !important;
+        white-space: nowrap;
+      }
+
+      .mission-episodes {
+        font-size: 0.65rem !important;
+        padding: 0.25rem 0.5rem !important;
+        white-space: nowrap;
+      }
+
+      .mission-title {
+        font-size: 0.875rem !important;
+        line-height: 1.2 !important;
+      }
+
+      .mission-description {
+        font-size: 0.65rem !important;
+        line-height: 1.3 !important;
+      }
+
+      .stat-card {
+        padding: 0.875rem !important;
+      }
+
+      .stat-icon-wrapper {
+        width: 2rem !important;
+        height: 2rem !important;
+      }
+
+      .stat-icon {
+        width: 1rem !important;
+        height: 1rem !important;
+      }
+
+      .stat-value {
+        font-size: 1.5rem !important;
+        margin-bottom: 0.25rem !important;
+      }
+
+      .stat-label {
+        font-size: 0.7rem !important;
+        line-height: 1.2 !important;
+      }
+    }
+
+    .mission-card:hover {
+      box-shadow: 0 20px 40px -16px rgba(0, 0, 0, 0.25);
+    }
+
+    .stat-card {
+      background: linear-gradient(135deg, hsl(0 0% 100%) 0%, hsl(0 0% 98%) 100%);
+    }
+
+    .cube-3d {
+      width: 120px;
+      height: 120px;
+      position: relative;
+      transform-style: preserve-3d;
+      animation: rotate-cube 20s infinite linear;
+    }
+
+    @keyframes rotate-cube {
+      0% { transform: rotateX(0deg) rotateY(0deg); }
+      100% { transform: rotateX(360deg) rotateY(360deg); }
+    }
+
+    .cube-face {
+      position: absolute;
+      width: 120px;
+      height: 120px;
+      background: linear-gradient(135deg, hsl(164 86% 45%) 0%, hsl(164 86% 35%) 100%);
+      border: 2px solid hsl(164 86% 35%);
+      opacity: 0.9;
+    }
+
+    .cube-face-front  { transform: rotateY(0deg) translateZ(60px); }
+    .cube-face-back   { transform: rotateY(180deg) translateZ(60px); }
+    .cube-face-right  { transform: rotateY(90deg) translateZ(60px); }
+    .cube-face-left   { transform: rotateY(-90deg) translateZ(60px); }
+    .cube-face-top    { transform: rotateX(90deg) translateZ(60px); }
+    .cube-face-bottom { transform: rotateX(-90deg) translateZ(60px); }
+  </style>
+</head>
+
+<body class="bg-background text-foreground">
+  <!-- Header -->
+  <header class="bg-background border-b border-border sticky top-0 z-40 shadow-soft rounded-b-3xl">
+    <div class="max-w-lg mx-auto px-6 py-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
+            <svg class="h-5 w-5 text-primary-foreground" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg>
+          </div>
+          <h1 class="text-2xl font-bold">Podelli</h1>
+        </div>
+        <span class="text-xs font-bold px-3 py-1.5 bg-primary text-primary-foreground rounded-full">
+          AI POWERED
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-lg mx-auto px-6 pt-8 pb-24">
+    <div class="space-y-6 animate-fade-in">
+      <div>
+        <h2 class="text-4xl font-bold mb-2">Mes Podes</h2>
+        <p class="text-muted-foreground">Rejouez vos missions terminées</p>
+      </div>
+
+      <!-- Content Container (will show either stats+grid or empty state) -->
+      <div id="contentContainer">
+        <!-- Stats Section (hidden when empty) -->
+        <div id="statsSection" class="mb-8">
+          <h3 class="text-xl font-bold mb-4">Statistiques Globales</h3>
+          <div class="grid grid-cols-2 gap-4">
+            <!-- Stat 1: Missions effectuées -->
+            <div class="stat-card p-5 rounded-3xl border-2 shadow-soft">
+              <div class="flex items-center gap-3 mb-2">
+                <div class="stat-icon-wrapper w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center">
+                  <svg class="stat-icon h-5 w-5 text-accent" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" x2="12" y1="22.08" y2="12"/></svg>
+                </div>
+              </div>
+              <div class="stat-value text-3xl font-bold mb-1" id="missionsCompleted">6</div>
+              <div class="stat-label text-sm text-muted-foreground">Missions effectuées</div>
+            </div>
+
+            <!-- Stat 2: Missions réussies -->
+            <div class="stat-card p-5 rounded-3xl border-2 shadow-soft">
+              <div class="flex items-center gap-3 mb-2">
+                <div class="stat-icon-wrapper w-10 h-10 rounded-full bg-green-500/10 flex items-center justify-center">
+                  <svg class="stat-icon h-5 w-5 text-green-500" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                </div>
+              </div>
+              <div class="stat-value text-3xl font-bold mb-1" id="missionsSucceeded">6</div>
+              <div class="stat-label text-sm text-muted-foreground">Missions réussies</div>
+            </div>
+
+            <!-- Stat 3: Taux de réussite -->
+            <div class="stat-card p-5 rounded-3xl border-2 shadow-soft">
+              <div class="flex items-center gap-3 mb-2">
+                <div class="stat-icon-wrapper w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center">
+                  <svg class="stat-icon h-5 w-5 text-amber-500" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+                </div>
+              </div>
+              <div class="stat-value text-3xl font-bold mb-1" id="successRate">100%</div>
+              <div class="stat-label text-sm text-muted-foreground">Taux de réussite</div>
+            </div>
+
+            <!-- Stat 4: Total épisodes -->
+            <div class="stat-card p-5 rounded-3xl border-2 shadow-soft">
+              <div class="flex items-center gap-3 mb-2">
+                <div class="stat-icon-wrapper w-10 h-10 rounded-full bg-purple-500/10 flex items-center justify-center">
+                  <svg class="stat-icon h-5 w-5 text-purple-500" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                </div>
+              </div>
+              <div class="stat-value text-3xl font-bold mb-1" id="totalEpisodes">48</div>
+              <div class="stat-label text-sm text-muted-foreground">Épisodes complétés</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Missions Grid (hidden when empty) -->
+        <div id="missionsGrid">
+          <h3 class="text-xl font-bold mb-4">Mes Missions</h3>
+          <div class="grid grid-cols-2 gap-4">
+            <!-- Mission 1: Voyage à l'Aéroport -->
+            <div class="mission-card rounded-3xl border-2 shadow-medium transition-smooth animate-scale-in" style="animation-delay: 0ms" onclick="playMission(1)">
+              <img src="https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=800&q=80" alt="Aéroport">
+              <div class="mission-card-content">
+                <div class="flex items-start justify-between gap-1">
+                  <span class="mission-badge text-xs font-bold px-3 py-1.5 bg-white/90 text-foreground rounded-full shadow-sm">
+                    Mission 1
+                  </span>
+                  <span class="mission-episodes text-xs font-semibold px-3 py-1.5 bg-accent/90 text-accent-foreground rounded-full shadow-sm">
+                    10 ép.
+                  </span>
+                </div>
+                <div class="text-white">
+                  <h4 class="mission-title font-bold text-base mb-1 drop-shadow-lg">Voyage à l'Aéroport</h4>
+                  <p class="mission-description text-xs opacity-90 drop-shadow-md">Maîtrisez les conversations essentielles pour voyager</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Mission 2: Au Restaurant -->
+            <div class="mission-card rounded-3xl border-2 shadow-medium transition-smooth animate-scale-in" style="animation-delay: 100ms" onclick="playMission(2)">
+              <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&q=80" alt="Restaurant">
+              <div class="mission-card-content">
+                <div class="flex items-start justify-between gap-1">
+                  <span class="mission-badge text-xs font-bold px-3 py-1.5 bg-white/90 text-foreground rounded-full shadow-sm">
+                    Mission 2
+                  </span>
+                  <span class="mission-episodes text-xs font-semibold px-3 py-1.5 bg-accent/90 text-accent-foreground rounded-full shadow-sm">
+                    8 ép.
+                  </span>
+                </div>
+                <div class="text-white">
+                  <h4 class="mission-title font-bold text-base mb-1 drop-shadow-lg">Au Restaurant</h4>
+                  <p class="mission-description text-xs opacity-90 drop-shadow-md">Commander, payer et discuter avec le serveur</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Mission 3: Shopping en Ville -->
+            <div class="mission-card rounded-3xl border-2 shadow-medium transition-smooth animate-scale-in" style="animation-delay: 200ms" onclick="playMission(3)">
+              <img src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800&q=80" alt="Shopping">
+              <div class="mission-card-content">
+                <div class="flex items-start justify-between gap-1">
+                  <span class="mission-badge text-xs font-bold px-3 py-1.5 bg-white/90 text-foreground rounded-full shadow-sm">
+                    Mission 3
+                  </span>
+                  <span class="mission-episodes text-xs font-semibold px-3 py-1.5 bg-accent/90 text-accent-foreground rounded-full shadow-sm">
+                    7 ép.
+                  </span>
+                </div>
+                <div class="text-white">
+                  <h4 class="mission-title font-bold text-base mb-1 drop-shadow-lg">Shopping en Ville</h4>
+                  <p class="mission-description text-xs opacity-90 drop-shadow-md">Demander des prix et acheter en toute confiance</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Mission 4: Premiers Secours -->
+            <div class="mission-card rounded-3xl border-2 shadow-medium transition-smooth animate-scale-in" style="animation-delay: 300ms" onclick="playMission(4)">
+              <img src="https://images.unsplash.com/photo-1631217868264-e5b90bb7e133?w=800&q=80" alt="Médecin">
+              <div class="mission-card-content">
+                <div class="flex items-start justify-between gap-1">
+                  <span class="mission-badge text-xs font-bold px-3 py-1.5 bg-white/90 text-foreground rounded-full shadow-sm">
+                    Mission 4
+                  </span>
+                  <span class="mission-episodes text-xs font-semibold px-3 py-1.5 bg-accent/90 text-accent-foreground rounded-full shadow-sm">
+                    6 ép.
+                  </span>
+                </div>
+                <div class="text-white">
+                  <h4 class="mission-title font-bold text-base mb-1 drop-shadow-lg">Premiers Secours</h4>
+                  <p class="mission-description text-xs opacity-90 drop-shadow-md">Décrire vos symptômes et obtenir de l'aide</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Mission 5: Réserver un Hôtel -->
+            <div class="mission-card rounded-3xl border-2 shadow-medium transition-smooth animate-scale-in" style="animation-delay: 400ms" onclick="playMission(5)">
+              <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80" alt="Hôtel">
+              <div class="mission-card-content">
+                <div class="flex items-start justify-between gap-1">
+                  <span class="mission-badge text-xs font-bold px-3 py-1.5 bg-white/90 text-foreground rounded-full shadow-sm">
+                    Mission 5
+                  </span>
+                  <span class="mission-episodes text-xs font-semibold px-3 py-1.5 bg-accent/90 text-accent-foreground rounded-full shadow-sm">
+                    9 ép.
+                  </span>
+                </div>
+                <div class="text-white">
+                  <h4 class="mission-title font-bold text-base mb-1 drop-shadow-lg">Réserver un Hôtel</h4>
+                  <p class="mission-description text-xs opacity-90 drop-shadow-md">Check-in, demandes spéciales et réclamations</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Mission 6: Transports Publics -->
+            <div class="mission-card rounded-3xl border-2 shadow-medium transition-smooth animate-scale-in" style="animation-delay: 500ms" onclick="playMission(6)">
+              <img src="https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=800&q=80" alt="Train">
+              <div class="mission-card-content">
+                <div class="flex items-start justify-between gap-1">
+                  <span class="mission-badge text-xs font-bold px-3 py-1.5 bg-white/90 text-foreground rounded-full shadow-sm">
+                    Mission 6
+                  </span>
+                  <span class="mission-episodes text-xs font-semibold px-3 py-1.5 bg-accent/90 text-accent-foreground rounded-full shadow-sm">
+                    8 ép.
+                  </span>
+                </div>
+                <div class="text-white">
+                  <h4 class="mission-title font-bold text-base mb-1 drop-shadow-lg">Transports Publics</h4>
+                  <p class="mission-description text-xs opacity-90 drop-shadow-md">Acheter des billets et demander votre chemin</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Empty State (shown when no missions) -->
+        <div id="emptyState" class="hidden flex flex-col items-center justify-center py-20 animate-fade-in">
+          <div class="perspective-container mb-8">
+            <div class="cube-3d">
+              <div class="cube-face cube-face-front"></div>
+              <div class="cube-face cube-face-back"></div>
+              <div class="cube-face cube-face-right"></div>
+              <div class="cube-face cube-face-left"></div>
+              <div class="cube-face cube-face-top"></div>
+              <div class="cube-face cube-face-bottom"></div>
+            </div>
+          </div>
+          <h3 class="text-2xl font-bold mb-3 text-center">Aucun Pode pour le moment</h3>
+          <p class="text-muted-foreground text-center max-w-sm mb-6">
+            Les Podes de vos missions apparaîtront ici une fois que vous les aurez terminées.
+          </p>
+          <a href="home.html" class="inline-flex items-center gap-2 px-6 py-3 bg-accent hover:bg-accent/90 text-accent-foreground rounded-full font-medium transition-smooth shadow-medium">
+            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            Commencer une mission
+          </a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Bottom Navigation -->
+  <nav class="fixed bottom-0 left-0 right-0 bg-background border-t border-border z-50 shadow-medium rounded-t-3xl">
+    <div class="max-w-lg mx-auto px-4">
+      <div class="flex items-center justify-around py-2">
+        <a href="home.html" class="flex flex-col items-center gap-1 py-2 px-4 rounded-xl transition-smooth text-muted-foreground hover:text-foreground">
+          <svg class="h-6 w-6 transition-smooth" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          <span class="text-xs font-medium">Home</span>
+        </a>
+        <a href="podes.html" class="flex flex-col items-center gap-1 py-2 px-4 rounded-xl transition-smooth text-accent">
+          <svg class="h-6 w-6 transition-smooth scale-110" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" x2="12" y1="22.08" y2="12"/></svg>
+          <span class="text-xs font-medium">Podes</span>
+        </a>
+        <a href="leaderboard.html" class="flex flex-col items-center gap-1 py-2 px-4 rounded-xl transition-smooth text-muted-foreground hover:text-foreground">
+          <svg class="h-6 w-6 transition-smooth" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+          <span class="text-xs font-medium">Leaderboard</span>
+        </a>
+        <a href="account.html" class="flex flex-col items-center gap-1 py-2 px-4 rounded-xl transition-smooth text-muted-foreground hover:text-foreground">
+          <svg class="h-6 w-6 transition-smooth" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span class="text-xs font-medium">Account</span>
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <script>
+    // Configuration: Set to false to show empty state
+    const hasMissions = true;
+
+    // Initialize page based on missions availability
+    function initializePage() {
+      const statsSection = document.getElementById('statsSection');
+      const missionsGrid = document.getElementById('missionsGrid');
+      const emptyState = document.getElementById('emptyState');
+
+      if (hasMissions) {
+        // Show stats and missions grid
+        statsSection.classList.remove('hidden');
+        missionsGrid.classList.remove('hidden');
+        emptyState.classList.add('hidden');
+      } else {
+        // Show empty state
+        statsSection.classList.add('hidden');
+        missionsGrid.classList.add('hidden');
+        emptyState.classList.remove('hidden');
+      }
+    }
+
+    // Play mission function
+    function playMission(missionNumber) {
+      console.log(`Playing mission ${missionNumber}`);
+      // TODO: Navigate to the pode player for this mission
+      // For now, redirect to home page with a query parameter
+      window.location.href = `home.html?mission=${missionNumber}`;
+    }
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', initializePage);
+  </script>
+  <!-- Podelli Scripts -->
+  <script src="/assets/js/utils.js"></script>
+  <script src="/assets/js/auth.js"></script>
+  <script src="/assets/js/api.js"></script>
+</body>
+</html>
