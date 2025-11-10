@@ -2,11 +2,33 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Mes Podes - Podelli</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- PWA Meta Tags -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Podelli">
+
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="/manifest.json">
+
+  <!-- Icons for iOS -->
+  <link rel="apple-touch-icon" href="/assets/icons/ios/152.png">
+  <link rel="apple-touch-icon" sizes="192x192" href="/assets/icons/ios/192.png">
+
+  <!-- Theme color -->
+  <meta name="theme-color" content="#1CB79A">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="/assets/images/favicon/favicon-96x96.png" sizes="96x96" />
+  <link rel="icon" type="image/svg+xml" href="/assets/images/favicon/favicon.svg" />
+  <link rel="shortcut icon" href="/assets/images/favicon/favicon.ico" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/images/favicon/apple-touch-icon.png" />
 
   <!-- TailwindCSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -75,12 +97,25 @@
       font-family: 'Inter', system-ui, sans-serif;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
+      /* Support pour le safe-area iOS */
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
     }
     h1, h2, h3, h4, h5, h6 { font-weight: 700; }
     .shadow-soft { box-shadow: 0 2px 16px -4px rgba(0, 0, 0, 0.06); }
     .shadow-medium { box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.1); }
     .shadow-strong { box-shadow: 0 12px 32px -12px rgba(0, 0, 0, 0.15); }
     .transition-smooth { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+
+    /* Header avec support safe-area iOS */
+    header {
+      padding-top: max(1rem, env(safe-area-inset-top));
+    }
+
+    /* Bottom navigation avec support safe-area iOS */
+    nav.bottom-nav {
+      padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+    }
 
     .mission-card {
       position: relative;
@@ -213,9 +248,9 @@
 </head>
 
 <body class="bg-background text-foreground">
-  <!-- Header -->
+  <!-- Header avec padding safe-area -->
   <header class="bg-background border-b border-border sticky top-0 z-40 shadow-soft rounded-b-3xl">
-    <div class="max-w-lg mx-auto px-6 py-4">
+    <div class="max-w-lg mx-auto px-6 py-3">
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-2">
           <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
@@ -223,7 +258,16 @@
           </div>
           <h1 class="text-2xl font-bold">Podelli</h1>
         </div>
-        <span class="text-xs font-bold px-3 py-1.5 bg-primary text-primary-foreground rounded-full">
+        
+        <!-- Bouton d'installation PWA (masqué par défaut, géré par pwa.js) -->
+        <button 
+          id="headerInstallBtn" 
+          onclick="pwaManager.triggerInstall()" 
+          class="hidden text-xs font-bold px-3 py-1.5 bg-accent text-accent-foreground rounded-full hover:bg-accent/90 transition-smooth"
+        >
+          Install
+        </button>
+        <span id="aiPoweredBadge" class="text-xs font-bold px-3 py-1.5 bg-primary text-primary-foreground rounded-full">
           AI POWERED
         </span>
       </div>
@@ -231,7 +275,7 @@
   </header>
 
   <!-- Main Content -->
-  <main class="max-w-lg mx-auto px-6 pt-8 pb-24">
+  <main class="max-w-lg mx-auto px-6 pt-8 pb-20">
     <div class="space-y-6 animate-fade-in">
       <div>
         <h2 class="text-4xl font-bold mb-2">Mes Podes</h2>
@@ -426,7 +470,7 @@
           <p class="text-muted-foreground text-center max-w-sm mb-6">
             Les Podes de vos missions apparaîtront ici une fois que vous les aurez terminées.
           </p>
-          <a href="home.html" class="inline-flex items-center gap-2 px-6 py-3 bg-accent hover:bg-accent/90 text-accent-foreground rounded-full font-medium transition-smooth shadow-medium">
+          <a href="/home.html" class="inline-flex items-center gap-2 px-6 py-3 bg-accent hover:bg-accent/90 text-accent-foreground rounded-full font-medium transition-smooth shadow-medium">
             <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
             Commencer une mission
           </a>
@@ -435,24 +479,24 @@
     </div>
   </main>
 
-  <!-- Bottom Navigation -->
-  <nav class="fixed bottom-0 left-0 right-0 bg-background border-t border-border z-50 shadow-medium rounded-t-3xl">
+  <!-- Bottom Navigation avec padding safe-area réduit -->
+  <nav class="bottom-nav fixed bottom-0 left-0 right-0 bg-background border-t border-border z-50 shadow-medium rounded-t-3xl">
     <div class="max-w-lg mx-auto px-4">
-      <div class="flex items-center justify-around py-2">
-        <a href="home.html" class="flex flex-col items-center gap-1 py-2 px-4 rounded-xl transition-smooth text-muted-foreground hover:text-foreground">
-          <svg class="h-6 w-6 transition-smooth" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <div class="flex items-center justify-around py-1.5">
+        <a href="/home.html" class="flex flex-col items-center gap-0.5 py-1.5 px-3 rounded-xl transition-smooth text-muted-foreground hover:text-foreground">
+          <svg class="h-5 w-5 transition-smooth" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
           <span class="text-xs font-medium">Home</span>
         </a>
-        <a href="podes.html" class="flex flex-col items-center gap-1 py-2 px-4 rounded-xl transition-smooth text-accent">
-          <svg class="h-6 w-6 transition-smooth scale-110" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" x2="12" y1="22.08" y2="12"/></svg>
+        <a href="/podes.html" class="flex flex-col items-center gap-0.5 py-1.5 px-3 rounded-xl transition-smooth text-accent">
+          <svg class="h-5 w-5 transition-smooth scale-110" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" x2="12" y1="22.08" y2="12"/></svg>
           <span class="text-xs font-medium">Podes</span>
         </a>
-        <a href="leaderboard.html" class="flex flex-col items-center gap-1 py-2 px-4 rounded-xl transition-smooth text-muted-foreground hover:text-foreground">
-          <svg class="h-6 w-6 transition-smooth" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+        <a href="/leaderboard.html" class="flex flex-col items-center gap-0.5 py-1.5 px-3 rounded-xl transition-smooth text-muted-foreground hover:text-foreground">
+          <svg class="h-5 w-5 transition-smooth" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
           <span class="text-xs font-medium">Leaderboard</span>
         </a>
-        <a href="account.html" class="flex flex-col items-center gap-1 py-2 px-4 rounded-xl transition-smooth text-muted-foreground hover:text-foreground">
-          <svg class="h-6 w-6 transition-smooth" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <a href="/account.html" class="flex flex-col items-center gap-0.5 py-1.5 px-3 rounded-xl transition-smooth text-muted-foreground hover:text-foreground">
+          <svg class="h-5 w-5 transition-smooth" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           <span class="text-xs font-medium">Account</span>
         </a>
       </div>
@@ -480,20 +524,39 @@
         missionsGrid.classList.add('hidden');
         emptyState.classList.remove('hidden');
       }
+      
+      // Show install button if PWA can be installed
+      checkInstallButton();
     }
 
     // Play mission function
     function playMission(missionNumber) {
       console.log(`Playing mission ${missionNumber}`);
-      // TODO: Navigate to the pode player for this mission
-      // For now, redirect to home page with a query parameter
-      window.location.href = `home.html?mission=${missionNumber}`;
+      // Navigate to home page with mission parameter
+      window.location.href = `/home.html?mission=${missionNumber}`;
+    }
+    
+    // Check if install button should be shown
+    function checkInstallButton() {
+      // Wait for pwaManager to be available
+      setTimeout(() => {
+        if (window.pwaManager && window.pwaManager.canInstall()) {
+          const installBtn = document.getElementById('headerInstallBtn');
+          const aiPoweredBadge = document.getElementById('aiPoweredBadge');
+          if (installBtn && aiPoweredBadge) {
+            installBtn.classList.remove('hidden');
+            aiPoweredBadge.classList.add('hidden');
+          }
+        }
+      }, 1000);
     }
 
     // Initialize on page load
     document.addEventListener('DOMContentLoaded', initializePage);
   </script>
+  
   <!-- Podelli Scripts -->
+  <script src="/assets/js/pwa.js"></script>
   <script src="/assets/js/utils.js"></script>
   <script src="/assets/js/auth.js"></script>
   <script src="/assets/js/api.js"></script>

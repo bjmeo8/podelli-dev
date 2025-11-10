@@ -2,11 +2,35 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Inscription - Podelli</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- PWA Meta Tags -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Podelli">
+
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="/manifest.json">
+
+  <!-- Icons for iOS -->
+  <link rel="apple-touch-icon" href="/assets/icons/ios/152.png">
+  <link rel="apple-touch-icon" sizes="192x192" href="/assets/icons/ios/192.png">
+
+  <!-- Theme color -->
+  <meta name="theme-color" content="#1CB79A">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="/assets/images/favicon/favicon-96x96.png" sizes="96x96" />
+  <link rel="icon" type="image/svg+xml" href="/assets/images/favicon/favicon.svg" />
+  <link rel="shortcut icon" href="/assets/images/favicon/favicon.ico" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/images/favicon/apple-touch-icon.png" />
+  <meta name="apple-mobile-web-app-title" content="Podelli" />
+  <link rel="manifest" href="/assets/images/favicon/site.webmanifest" />
 
   <!-- TailwindCSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -69,12 +93,23 @@
     body {
       font-family: 'Inter', system-ui, sans-serif;
       -webkit-font-smoothing: antialiased;
+      /* Support pour le safe-area iOS */
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
       -moz-osx-font-smoothing: grayscale;
     }
     h1, h2, h3, h4, h5, h6 { font-weight: 700; }
     .shadow-soft { box-shadow: 0 2px 16px -4px rgba(0, 0, 0, 0.06); }
     .shadow-medium { box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.1); }
     .transition-smooth { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+
+    header {
+      padding-top: max(1rem, env(safe-area-inset-top));
+    }
+    
+    nav.bottom-nav {
+      padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+    }
 
     .input-field {
       transition: all 0.3s ease;
@@ -406,10 +441,11 @@
       console.log('Sign up attempt:', { name, email, password });
 
       // For now, redirect to onboarding page
-      window.location.href = 'onboarding.html';
+      window.location.href = "/onboarding.html";
     });
   </script>
   <!-- Podelli Scripts -->
+  <script src="/assets/js/pwa.js"></script>
   <script src="/assets/js/utils.js"></script>
   <script src="/assets/js/auth.js"></script>
   <script src="/assets/js/api.js"></script>
