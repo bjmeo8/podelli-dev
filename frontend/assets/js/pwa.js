@@ -260,17 +260,36 @@ class PWAManager {
         }
       }
 
+      // Add mobile class to body for CSS targeting
+      if (isMobile) {
+        console.log('📱 Running on mobile device');
+        document.body.classList.add('mobile-device');
+      }
+
       // Hide header on mobile/PWA, show only on web desktop/tablet
       if (isMobile || isPWA) {
         const header = document.querySelector('header');
         if (header) {
           header.style.display = 'none';
         }
-        // Adjust content padding
+
+        // Remove top padding from gradient overlays in video cards
+        const gradientOverlays = document.querySelectorAll('.gradient-overlay-top');
+        gradientOverlays.forEach(overlay => {
+          overlay.style.paddingTop = '1rem';
+        });
+
+        // Adjust feed container
         const feedContainer = document.querySelector('.feed-container');
         if (feedContainer) {
           feedContainer.style.paddingTop = '0';
         }
+
+        // Adjust main content areas (for other pages)
+        const mainElements = document.querySelectorAll('main');
+        mainElements.forEach(main => {
+          main.style.paddingTop = '1rem';
+        });
       }
     }
 
