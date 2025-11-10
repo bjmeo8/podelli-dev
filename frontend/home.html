@@ -8,30 +8,17 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
-  <!-- PWA Meta Tags -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Podelli">
-
-  <!-- PWA Manifest -->
-  <link rel="manifest" href="/manifest.json">
-
-  <!-- Icons for iOS -->
-  <link rel="apple-touch-icon" href="/assets/icons/ios/152.png">
-  <link rel="apple-touch-icon" sizes="192x192" href="/assets/icons/ios/192.png">
+  <!-- Meta Tags -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <!-- Theme color -->
   <meta name="theme-color" content="#1CB79A">
-  
+
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="/assets/images/favicon/favicon-96x96.png" sizes="96x96" />
   <link rel="icon" type="image/svg+xml" href="/assets/images/favicon/favicon.svg" />
   <link rel="shortcut icon" href="/assets/images/favicon/favicon.ico" />
   <link rel="apple-touch-icon" sizes="180x180" href="/assets/images/favicon/apple-touch-icon.png" />
-  <meta name="apple-mobile-web-app-title" content="Podelli" />
-  <link rel="manifest" href="/assets/images/favicon/site.webmanifest" />
 
   <!-- TailwindCSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -85,53 +72,14 @@
     .shadow-medium { box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.1); }
     .transition-smooth { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
 
-    /* Background color for status bar (iOS devices) */
-    body {
-      background-color: #1CB79A;
-    }
-
     header {
-      padding-top: max(1rem, env(safe-area-inset-top));
-      background-color: #ffffff;
+      padding-top: 1rem;
     }
 
-    /* Optimized footer navigation for all devices */
+    /* Footer navigation */
     nav {
-      padding-top: 0.375rem;
-      padding-bottom: 0.25rem;
-      background-color: #ffffff;
-    }
-
-    /* Better footer positioning for iPhone X and newer */
-    @supports (padding-bottom: env(safe-area-inset-bottom)) {
-      nav {
-        padding-bottom: calc(0.25rem + env(safe-area-inset-bottom));
-      }
-    }
-
-    /* Compact navigation items */
-    nav a {
-      padding: 0.375rem 0.5rem !important;
-      gap: 0.125rem !important;
-    }
-
-    /* Smaller icons for better spacing */
-    nav svg {
-      height: 1.125rem !important;
-      width: 1.125rem !important;
-    }
-
-    /* Smaller text */
-    nav span {
-      font-size: 0.65rem !important;
-      margin-top: 0;
-      line-height: 1;
-    }
-
-    /* Adjust container padding */
-    nav > div {
-      padding-top: 0 !important;
-      padding-bottom: 0 !important;
+      padding-top: 0.5rem;
+      padding-bottom: 0.5rem;
     }
 
     .feed-container {
@@ -304,15 +252,7 @@
           </div>
           <h1 class="text-2xl font-bold">Podelli</h1>
         </div>
-        <!-- Bouton d'installation PWA (masqué par défaut, géré par pwa.js) -->
-        <button 
-          id="headerInstallBtn" 
-          onclick="pwaManager.triggerInstall()" 
-          class="hidden text-xs font-bold px-3 py-1.5 bg-accent text-accent-foreground rounded-full hover:bg-accent/90 transition-smooth"
-        >
-          Install
-        </button>
-        <span id="aiPoweredBadge" class="text-xs font-bold px-3 py-1.5 bg-primary text-primary-foreground rounded-full">
+        <span class="text-xs font-bold px-3 py-1.5 bg-primary text-primary-foreground rounded-full">
           AI POWERED
         </span>
       </div>
@@ -1120,27 +1060,7 @@
     }
   </script>
 
-  <script>
-    // Check if install button should be shown
-    function checkInstallButton() {
-      // Wait for pwaManager to be available
-      setTimeout(() => {
-        if (window.pwaManager && window.pwaManager.canInstall()) {
-          const installBtn = document.getElementById('headerInstallBtn');
-          const aiPoweredBadge = document.getElementById('aiPoweredBadge');
-          if (installBtn && aiPoweredBadge) {
-            installBtn.classList.remove('hidden');
-            aiPoweredBadge.classList.add('hidden');
-          }
-        }
-      }, 1000);
-    }
-    // Initialize on page load
-    window.addEventListener('DOMContentLoaded', checkInstallButton);
-  </script>
-
   <!-- Podelli Scripts -->
-  <script src="/assets/js/pwa.js"></script>
   <script src="/assets/js/utils.js"></script>
   <script src="/assets/js/auth.js"></script>
   <script src="/assets/js/api.js"></script>
